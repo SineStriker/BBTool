@@ -35,17 +35,21 @@ namespace BBDown.Core.Util
             return htmlCode;
         }
 
-        public static async Task<string> GetPostResponseAsync(string Url, byte[] postData)
+        public static async Task<string> GetPostResponseAsync(string Url, byte[] postData, string contentType = "application/grpc")
         {
             LogDebug("Post to: {0}, data: {1}", Url, Convert.ToBase64String(postData));
             using HttpRequestMessage request = new(HttpMethod.Post, Url);
-            request.Headers.TryAddWithoutValidation("Content-Type", "application/grpc");
+            request.Headers.TryAddWithoutValidation("Content-Type",  contentType);
             request.Headers.TryAddWithoutValidation("Content-Length", postData.Length.ToString());
-            request.Headers.TryAddWithoutValidation("User-Agent", "Dalvik/2.1.0 (Linux; U; Android 6.0.1; oneplus a5010 Build/V417IR) 6.10.0 os/android model/oneplus a5010 mobi_app/android build/6100500 channel/bili innerVer/6100500 osVer/6.0.1 network/2");
+            request.Headers.TryAddWithoutValidation("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36");
             request.Headers.TryAddWithoutValidation("Cookie", Config.COOKIE);
             request.Content = new ByteArrayContent(postData);
+            
+            LogDebug("获取网页内容：Url: {0}, Headers: {1}", Url, request.Headers);
             var webResponse = await AppHttpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
             string htmlCode = await webResponse.Content.ReadAsStringAsync();
+            LogDebug("Response: {0}", htmlCode);
+            
             return htmlCode;
         }
     }

@@ -4,6 +4,8 @@ using System.Collections;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using System.Web;
 using BBDown;
 using BBDown.Core;
 using CmtMsg;
@@ -22,7 +24,7 @@ public static class Program
 
     private static volatile bool AcceptExit = false;
 
-    private static volatile bool CacheReadOver = false;
+    private static volatile bool MissionSuccess = false;
 
     public class AppData
     {
@@ -37,11 +39,10 @@ public static class Program
         public string VideoId { get; set; } = "";
         public string Message { get; set; } = "";
         public Video.VideoInfo VideoInfo { get; set; } = new Video.VideoInfo();
-        public int CommentCount { get; set; } = -1;
-        public int RootCommentCount { get; set; } = -1;
+        public Video.CommentCountInfo CommentCountInfo { get; set; } = new Video.CommentCountInfo();
         public CommentList Comments { get; set; } = new CommentList();
-
-        public List<CommentList> SubComments { get; set; } = new List<CommentList>();
+        public Dictionary<long, CommentList> SubComments { get; set; } = new Dictionary<long, CommentList>();
+        public int MessageSent { get; set; } = 0;
 
         public bool IsValid()
         {
@@ -50,7 +51,7 @@ public static class Program
                 return false;
             }
 
-            if (VideoInfo.Avid < 0 || CommentCount < 0 || RootCommentCount < 0)
+            if (VideoInfo.Avid < 0 || CommentCountInfo.Root < 0 || CommentCountInfo.Total < 0)
             {
                 return false;
             }
@@ -79,20 +80,26 @@ public static class Program
 
     public static int MainRoutine(string[] args)
     {
-        // 没有命令行参数
-        if (!args.Any())
-        {
-            ShowHelp();
-            return 0;
-        }
-
         // 解析命令行参数
         string msg_path = "";
         long interval = 1000;
         bool recover = false;
 
-        var positionalArgs = new List<string>();
+        // 没有命令行参数
+        if (!args.Any())
+        {
+            if (File.Exists(APP_DATA_PATH))
+            {
+                recover = true;
+            }
+            else
+            {
+                ShowHelp();
+                return 0;
+            }
+        }
 
+        var positionalArgs = new List<string>();
         for (int i = 0; i < args.Length; ++i)
         {
             string arg = args[i];
@@ -200,7 +207,8 @@ public static class Program
             // 检测缓存
             try
             {
-                appData = JsonSerializer.Deserialize<AppData>(File.ReadAllText(APP_DATA_PATH));
+                appData = JsonSerializer.Deserialize<AppData>(File.ReadAllText(APP_DATA_PATH),
+                    Sys.UnicodeJsonSerializeOption());
                 if (!appData.IsValid())
                 {
                     appData = null;
@@ -270,18 +278,10 @@ public static class Program
             var avid = appData.VideoInfo.Avid;
 
             // 获取评论总数
-            appData.CommentCount = Video.GetCommentCount(avid);
-            if (appData.CommentCount < 0)
+            appData.CommentCountInfo = Video.GetCommentCount(avid);
+            if (appData.CommentCountInfo.Root < 0 || appData.CommentCountInfo.Total < 0)
             {
                 Logger.LogError("无法获取评论数");
-                return 0;
-            }
-
-            // 获取根评论总数
-            appData.RootCommentCount = Video.GetRootCommentCount(avid);
-            if (appData.RootCommentCount < 0)
-            {
-                Logger.LogError("无法获取根评论数");
                 return 0;
             }
         }
@@ -292,7 +292,7 @@ public static class Program
         Logger.LogColor($"发布日期：{appData.VideoInfo.PublishTime}");
         Logger.LogColor($"标题：{appData.VideoInfo.Title}");
         Logger.LogColor($"分区：{appData.VideoInfo.Category}");
-        Logger.LogColor($"评论数：{appData.CommentCount}");
+        Logger.LogColor($"评论数：{appData.CommentCountInfo.Total}");
         Console.WriteLine();
 
         // 添加退出事件
@@ -305,7 +305,18 @@ public static class Program
                 // 等待主线程同意退出
             }
 
-            File.WriteAllText(APP_DATA_PATH, JsonSerializer.Serialize(appData));
+            if (MissionSuccess)
+            {
+                File.WriteAllText(APP_DATA_PATH, JsonSerializer.Serialize(appData, Sys.UnicodeJsonSerializeOption()));
+            }
+            else
+            {
+                var info = new FileInfo(APP_DATA_PATH);
+                if (info.Exists)
+                {
+                    info.Delete();
+                }
+            }
         };
         Console.CancelKeyPress += (sender, e) =>
         {
@@ -314,15 +325,17 @@ public static class Program
         };
 
         // 依次获取根评论信息
+        Logger.Log($"获取根评论区所有用户信息，每页{AppData.NumPerPage}个，总共{appData.CommentCountInfo.Root}个...");
         if (!appData.Comments.Over)
         {
-            Logger.Log($"获取所有根评论信息，每页{AppData.NumPerPage}个，总共{appData.RootCommentCount}个...");
+            var total = appData.CommentCountInfo.Root;
+            AppData.CommentList commentList = appData.Comments;
 
-            var bar = new ProgressBar(0, appData.RootCommentCount);
+            var bar = new ProgressBar(0, total);
             bool task1Res = Task.Run(() =>
                 {
-                    var list = appData.Comments.Values;
-                    while (list.Count < appData.RootCommentCount)
+                    var list = commentList.Values;
+                    while (list.Count < total)
                     {
                         var comments = Video.GetRootComments(appData.VideoInfo.Avid, AppData.NumPerPage,
                             (int)((double)list.Count / AppData.NumPerPage) + 1);
@@ -334,30 +347,147 @@ public static class Program
                         list.AddRange(comments);
                         bar.Report(list.Count);
 
+                        // 避免发送请求太快，设置延时
+                        Thread.Sleep((int)appData.Interval);
+
                         if (comments.Count < AppData.NumPerPage)
                         {
                             break;
                         }
-
-                        // 避免发送请求太快，设置延时
-                        Thread.Sleep((int)appData.Interval);
                     }
 
-                    appData.Comments.Over = true;
+                    commentList.Over = true;
                     return true;
                 }
             ).Result;
             bar.Dispose();
             if (!task1Res)
             {
-                Logger.LogError("获取根评论信息失败");
+                Logger.LogError("获取根评论区用户信息失败");
                 return 0;
             }
         }
-        Logger.Log($"获取根评论区信息完成");
-        
+
+        Logger.Log($"获取根评论区用户信息完成");
+
+        var subCommentTotal = appData.CommentCountInfo.Total - appData.Comments.Values.Count;
+        var subCommentIndex = 0;
+
         // 依次获取副评论区信息
-        
+        Logger.Log($"获取副评论区所有用户信息，每页{AppData.NumPerPage}个，总共{subCommentTotal}个...");
+        foreach (var item in appData.Comments.Values)
+        {
+            // 如果没有评论
+            if (item.Count == 0)
+            {
+                continue;
+            }
+
+            // 如果有评论
+            var total = item.Count;
+            AppData.CommentList commentList;
+            if (!appData.SubComments.TryGetValue(item.Id, out commentList))
+            {
+                commentList = new AppData.CommentList();
+                appData.SubComments.Add(item.Id, commentList);
+            }
+
+            // 如果已经获取完了
+            if (commentList.Over)
+            {
+                continue;
+            }
+
+            var bar = new ProgressBar(subCommentIndex, subCommentIndex + total);
+            bool task2Res = Task.Run(() =>
+                {
+                    var list = commentList.Values;
+                    while (list.Count < total)
+                    {
+                        var comments = Video.GetSubComments(appData.VideoInfo.Avid, item.Id, AppData.NumPerPage,
+                            (int)((double)list.Count / AppData.NumPerPage) + 1);
+                        if (comments == null)
+                        {
+                            return false;
+                        }
+
+                        list.AddRange(comments);
+                        bar.Report(subCommentIndex + list.Count);
+
+                        // 避免发送请求太快，设置延时
+                        Thread.Sleep((int)appData.Interval);
+
+                        if (comments.Count < AppData.NumPerPage)
+                        {
+                            break;
+                        }
+                    }
+
+                    commentList.Over = true;
+                    return true;
+                }
+            ).Result;
+            bar.Dispose();
+            if (!task2Res)
+            {
+                Logger.LogError($"获取副评论区{item.Id}用户信息失败");
+                return 0;
+            }
+
+            subCommentIndex += commentList.Values.Count;
+        }
+
+        Logger.Log($"获取副评论区用户信息完成");
+
+        var users = new List<long>();
+        foreach (var item in appData.Comments.Values)
+        {
+            users.Add(item.UserId);
+        }
+
+        foreach (var item in appData.SubComments.Values)
+        {
+            foreach (var subitem in item.Values)
+            {
+                users.Add(subitem.UserId);
+            }
+        }
+
+        // 发送消息
+        Logger.Log($"向所有用户发送消息");
+        {
+            var bar = new ProgressBar(appData.MessageSent, users.Count);
+
+            var task3Res = Task.Run(() =>
+            {
+                int i = appData.MessageSent;
+                for (; i < users.Count; ++i)
+                {
+                    if (!User.SendMessage(userInfo.UserId, users[i], appData.Message))
+                    {
+                        break;
+                    }
+
+                    bar.Report(i);
+
+                    // 避免发送请求太快，设置延时
+                    Thread.Sleep((int)appData.Interval);
+                }
+
+                return i;
+            });
+
+            appData.MessageSent = task3Res.Result;
+        }
+
+        if (appData.MessageSent == users.Count)
+        {
+            MissionSuccess = true;
+        }
+        else
+        {
+            Logger.LogError("发送消息失败");
+        }
 
         return 0;
     }

@@ -58,7 +58,7 @@ namespace BBDown
                     new string('#', progressBlockCount), new string('-', blockCount - progressBlockCount),
                     animation[animationIndex++ % animation.Length],
                     currentValue,
-                    maximum - minimum
+                    maximum
                 );
                 UpdateText(text);
 

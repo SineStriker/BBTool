@@ -22,7 +22,13 @@ public class Video
     {
         public long Id { get; set; } = -1;
         public long UserId { get; set; }
-        public long Count { get; set; }
+        public int Count { get; set; }
+    }
+
+    public class CommentCountInfo
+    {
+        public int Root { get; set; } = -1;
+        public int Total { get; set; } = -1;
     }
 
     public static VideoInfo GetVideoInfo(string id)
@@ -36,7 +42,7 @@ public class Video
             int code = json.GetProperty("code").GetInt32();
             if (code != 0)
             {
-                Logger.LogDebug($"错误码：{code}");
+                Logger.LogDebug($"错误码：{code}；错误信息：{json.GetProperty("message").GetString()}");
                 throw new Exception();
             }
 
@@ -45,7 +51,7 @@ public class Video
             info.Uploader = dataObj.GetProperty("owner").GetProperty("name").GetString();
             info.Title = dataObj.GetProperty("title").GetString();
             info.Category = dataObj.GetProperty("tname").GetString();
-            info.PublishTime = GetDateTime(dataObj.GetProperty("pubdate").GetInt32());
+            info.PublishTime = Sys.GetDateTime(dataObj.GetProperty("pubdate").GetInt32());
         }
         catch (Exception e)
         {
@@ -54,35 +60,9 @@ public class Video
         return info;
     }
 
-    public static int GetCommentCount(long avid)
+    public static CommentCountInfo GetCommentCount(long avid)
     {
-        int cnt = -1;
-        try
-        {
-            string api = $"http://api.bilibili.com/x/v2/reply/count?type=1&oid={avid}";
-            var source = HTTPUtil.GetWebSourceAsync(api).Result;
-            var json = JsonDocument.Parse(source).RootElement;
-            int code = json.GetProperty("code").GetInt32();
-            if (code != 0)
-            {
-                Logger.LogDebug($"错误码：{code}");
-                throw new Exception();
-            }
-
-            var dataObj = json.GetProperty("data");
-            cnt = dataObj.GetProperty("count").GetInt32();
-        }
-        catch (Exception e)
-        {
-        }
-
-        return cnt;
-    }
-
-
-    public static int GetRootCommentCount(long avid)
-    {
-        int cnt = -1;
+        var info = new CommentCountInfo();
         try
         {
             string api = $"http://api.bilibili.com/x/v2/reply?type=1&oid={avid}&ps=1";
@@ -91,18 +71,20 @@ public class Video
             int code = json.GetProperty("code").GetInt32();
             if (code != 0)
             {
-                Logger.LogDebug($"错误码：{code}");
+                Logger.LogDebug($"错误码：{code}；错误信息：{json.GetProperty("message").GetString()}");
                 throw new Exception();
             }
 
             var dataObj = json.GetProperty("data");
-            cnt = dataObj.GetProperty("page").GetProperty("count").GetInt32();
+            info.Root = dataObj.GetProperty("page").GetProperty("count").GetInt32();
+            info.Total = dataObj.GetProperty("page").GetProperty("acount").GetInt32();
         }
         catch (Exception e)
         {
+            info = null;
         }
 
-        return cnt;
+        return info;
     }
 
     public static List<CommentInfo> GetRootComments(long avid, int numPerPage, int page)
@@ -118,7 +100,7 @@ public class Video
             int code = json.GetProperty("code").GetInt32();
             if (code != 0)
             {
-                Logger.LogDebug($"错误码：{code}");
+                Logger.LogDebug($"错误码：{code}；错误信息：{json.GetProperty("message").GetString()}");
                 throw new Exception();
             }
 
@@ -127,7 +109,7 @@ public class Video
             if (cnt > 0)
             {
                 var replies = dataObj.GetProperty("replies");
-                
+
                 var fs = new FileStream(DEBUG_PATH, FileMode.Append);
                 var stream = new StreamWriter(fs);
                 stream.WriteLine(api);
@@ -137,7 +119,7 @@ public class Video
                     var info = new CommentInfo();
                     info.Id = item.GetProperty("rpid").GetInt64();
                     info.UserId = item.GetProperty("mid").GetInt64();
-                    info.Count = item.GetProperty("count").GetInt64();
+                    info.Count = item.GetProperty("count").GetInt32();
 
                     {
                         stream.WriteLine(
@@ -162,11 +144,60 @@ public class Video
         return comments;
     }
 
-    private static DateTime GetDateTime(int timeStamp)
+    public static List<CommentInfo> GetSubComments(long avid, long rpid, int numPerPage, int page)
     {
-        DateTime dtStart = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-        long lTime = long.Parse(timeStamp + "0000000");
-        TimeSpan toNow = new TimeSpan(lTime);
-        return dtStart.Add(toNow);
+        var comments = new List<CommentInfo>();
+
+        try
+        {
+            string api =
+                $"http://api.bilibili.com/x/v2/reply/reply?type=1&oid={avid}&root={rpid}&ps={numPerPage}&pn={page}";
+            var source = HTTPUtil.GetWebSourceAsync(api).Result;
+            var json = JsonDocument.Parse(source).RootElement;
+            int code = json.GetProperty("code").GetInt32();
+            if (code != 0)
+            {
+                Logger.LogDebug($"错误码：{code}；错误信息：{json.GetProperty("message").GetString()}");
+                throw new Exception();
+            }
+
+            var dataObj = json.GetProperty("data");
+            int cnt = dataObj.GetProperty("page").GetProperty("count").GetInt32();
+            if (cnt > 0)
+            {
+                var replies = dataObj.GetProperty("replies");
+
+                var fs = new FileStream(DEBUG_PATH, FileMode.Append);
+                var stream = new StreamWriter(fs);
+                stream.WriteLine(api);
+
+                foreach (JsonElement item in replies.EnumerateArray())
+                {
+                    var info = new CommentInfo();
+                    info.Id = item.GetProperty("rpid").GetInt64();
+                    info.UserId = item.GetProperty("mid").GetInt64();
+                    info.Count = item.GetProperty("count").GetInt32();
+
+                    {
+                        stream.WriteLine(
+                            item.GetProperty("member").GetProperty("uname").GetString() + " : " +
+                            item.GetProperty("content").GetProperty("message").GetString(), Encoding.UTF8);
+                    }
+
+                    comments.Add(info);
+                }
+
+                stream.WriteLine();
+                stream.Close();
+                fs.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            comments = null;
+        }
+
+        return comments;
     }
 }
