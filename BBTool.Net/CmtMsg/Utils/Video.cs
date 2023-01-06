@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿#define NO_DEBUG_FILE
+
+using System.Text;
 using System.Text.Json;
 using BBDown.Core;
 using BBDown.Core.Util;
@@ -7,7 +9,9 @@ namespace CmtMsg;
 
 public class Video
 {
+#if ! NO_DEBUG_FILE
     public static string DEBUG_PATH = Path.Combine(Path.GetDirectoryName(Environment.ProcessPath), "CmtMsg.debug.txt");
+#endif
 
     public class VideoInfo
     {
@@ -110,9 +114,11 @@ public class Video
             {
                 var replies = dataObj.GetProperty("replies");
 
+#if ! NO_DEBUG_FILE
                 var fs = new FileStream(DEBUG_PATH, FileMode.Append);
                 var stream = new StreamWriter(fs);
                 stream.WriteLine(api);
+#endif
 
                 foreach (JsonElement item in replies.EnumerateArray())
                 {
@@ -121,18 +127,22 @@ public class Video
                     info.UserId = item.GetProperty("mid").GetInt64();
                     info.Count = item.GetProperty("count").GetInt32();
 
+#if ! NO_DEBUG_FILE
                     {
                         stream.WriteLine(
                             item.GetProperty("member").GetProperty("uname").GetString() + " : " +
                             item.GetProperty("content").GetProperty("message").GetString(), Encoding.UTF8);
                     }
+#endif
 
                     comments.Add(info);
                 }
 
+#if ! NO_DEBUG_FILE
                 stream.WriteLine();
                 stream.Close();
                 fs.Close();
+#endif
             }
         }
         catch (Exception e)
@@ -167,9 +177,11 @@ public class Video
             {
                 var replies = dataObj.GetProperty("replies");
 
+#if ! NO_DEBUG_FILE
                 var fs = new FileStream(DEBUG_PATH, FileMode.Append);
                 var stream = new StreamWriter(fs);
                 stream.WriteLine(api);
+#endif
 
                 foreach (JsonElement item in replies.EnumerateArray())
                 {
@@ -178,18 +190,22 @@ public class Video
                     info.UserId = item.GetProperty("mid").GetInt64();
                     info.Count = item.GetProperty("count").GetInt32();
 
+#if ! NO_DEBUG_FILE
                     {
                         stream.WriteLine(
                             item.GetProperty("member").GetProperty("uname").GetString() + " : " +
                             item.GetProperty("content").GetProperty("message").GetString(), Encoding.UTF8);
                     }
+#endif
 
                     comments.Add(info);
                 }
 
+#if ! NO_DEBUG_FILE
                 stream.WriteLine();
                 stream.Close();
                 fs.Close();
+#endif
             }
         }
         catch (Exception e)

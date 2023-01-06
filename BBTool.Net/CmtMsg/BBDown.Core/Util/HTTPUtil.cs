@@ -38,6 +38,7 @@ namespace BBDown.Core.Util
         public static async Task<string> GetPostResponseAsync(string Url, byte[] postData, string contentType = "application/grpc")
         {
             LogDebug("Post to: {0}, data: {1}", Url, Convert.ToBase64String(postData));
+            
             using HttpRequestMessage request = new(HttpMethod.Post, Url);
             request.Headers.TryAddWithoutValidation("Content-Type",  contentType);
             request.Headers.TryAddWithoutValidation("Content-Length", postData.Length.ToString());

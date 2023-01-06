@@ -22,6 +22,15 @@ public class User
         public string UserName { get; set; }
     }
 
+    public enum SendMessageResult
+    {
+        Success,
+        CSRFNotFound,
+        BlackList,
+        RequestError,
+        HttpError,
+    }
+
     public static UserInfo GetUserInfo()
     {
         var info = new UserInfo();
@@ -49,7 +58,7 @@ public class User
         return info;
     }
 
-    public static bool SendMessage(long senderId, long receiverId, string content)
+    public static SendMessageResult SendMessage(long senderId, long receiverId, string content)
     {
         // 查找 CSRF Token
         var csrf = "";
@@ -61,7 +70,7 @@ public class User
         else
         {
             Logger.LogDebug($"找不到 CSRF Token");
-            return false;
+            return SendMessageResult.CSRFNotFound;
         }
 
         // 建立表单
@@ -78,7 +87,7 @@ public class User
             { "csrf_token", csrf },
             { "csrf", csrf },
         };
-        var dataStr = String.Join('&',
+        var dataStr = string.Join('&',
             fields.Select(pair =>
             {
                 return HttpUtility.UrlEncode(pair.Key) + "=" + HttpUtility.UrlEncode(pair.Value.ToString());
@@ -89,6 +98,7 @@ public class User
         {
             var api = "https://api.vc.bilibili.com/web_im/v1/web_im/send_msg";
 
+
             // 创建 HTTP 请求
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(api);
             request.Method = "POST";
@@ -96,7 +106,7 @@ public class User
             request.UserAgent =
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36";
             request.Headers.Add("Cookie", Config.COOKIE);
-            
+
             // 写入正文
             using (Stream reqStream = request.GetRequestStream())
             {
@@ -118,17 +128,22 @@ public class User
             // var source = HTTPUtil.GetPostResponseAsync(api, data, "application/x-www-form-urlencoded").Result;
             var json = JsonDocument.Parse(source).RootElement;
             int code = json.GetProperty("code").GetInt32();
-            if (code != 0)
+            if (code == 25003)
+            {
+                Logger.LogWarn($"UID{receiverId}：{json.GetProperty("message").GetString()}");
+                return SendMessageResult.BlackList;
+            }
+            else if (code != 0)
             {
                 Logger.LogDebug($"错误码：{code}；错误信息：{json.GetProperty("message").GetString()}");
-                throw new Exception();
+                return SendMessageResult.RequestError;
             }
         }
         catch (Exception e)
         {
-            return false;
+            return SendMessageResult.HttpError;
         }
 
-        return true;
+        return SendMessageResult.Success;
     }
 }

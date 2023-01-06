@@ -42,6 +42,8 @@ public static class Program
         public Video.CommentCountInfo CommentCountInfo { get; set; } = new Video.CommentCountInfo();
         public CommentList Comments { get; set; } = new CommentList();
         public Dictionary<long, CommentList> SubComments { get; set; } = new Dictionary<long, CommentList>();
+
+        public List<long> BlackList = new List<long>();
         public int MessageSent { get; set; } = 0;
 
         public bool IsValid()
@@ -305,7 +307,7 @@ public static class Program
                 // 等待主线程同意退出
             }
 
-            if (MissionSuccess)
+            if (!MissionSuccess)
             {
                 File.WriteAllText(APP_DATA_PATH, JsonSerializer.Serialize(appData, Sys.UnicodeJsonSerializeOption()));
             }
@@ -453,8 +455,11 @@ public static class Program
             }
         }
 
+        // Console.WriteLine(User.SendMessage(userInfo.UserId, 329506771, "."));
+        // return 0;
+
         // 发送消息
-        Logger.Log($"向所有用户发送消息");
+        Logger.Log($"向所有用户发送消息...");
         {
             var bar = new ProgressBar(appData.MessageSent, users.Count);
 
@@ -463,7 +468,13 @@ public static class Program
                 int i = appData.MessageSent;
                 for (; i < users.Count; ++i)
                 {
-                    if (!User.SendMessage(userInfo.UserId, users[i], appData.Message))
+                    var receiver = users[i];
+                    var res = User.SendMessage(userInfo.UserId, receiver, appData.Message);
+                    if (res == User.SendMessageResult.BlackList)
+                    {
+                        appData.BlackList.Add(receiver);
+                    }
+                    else if (res != User.SendMessageResult.Success)
                     {
                         break;
                     }
@@ -483,6 +494,12 @@ public static class Program
         if (appData.MessageSent == users.Count)
         {
             MissionSuccess = true;
+
+            if (appData.BlackList.Any())
+            {
+                Logger.LogWarn(
+                    $"因黑名单无法发送的用户：{string.Join(';', appData.BlackList.Select(item => { return item.ToString(); }))}");
+            }
         }
         else
         {
