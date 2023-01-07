@@ -22,15 +22,6 @@ public class User
         public string UserName { get; set; }
     }
 
-    public enum SendMessageResult
-    {
-        Success,
-        CSRFNotFound,
-        BlackList,
-        RequestError,
-        HttpError,
-    }
-
     public static UserInfo GetUserInfo()
     {
         var info = new UserInfo();
@@ -58,11 +49,11 @@ public class User
         return info;
     }
 
-    public static SendMessageResult SendMessage(long senderId, long receiverId, string content)
+    public static int SendMessage(long senderId, long receiverId, string content)
     {
         // 查找 CSRF Token
         var csrf = "";
-        var match = new Regex("bili_jct=(.*?);").Match(Config.COOKIE);
+        var match = new Regex("bili_jct=(.*?);").Match(Config.COOKIE + ";");
         if (match.Success)
         {
             csrf = match.Groups[1].Value;
@@ -70,7 +61,7 @@ public class User
         else
         {
             Logger.LogDebug($"找不到 CSRF Token");
-            return SendMessageResult.CSRFNotFound;
+            return -1;
         }
 
         // 建立表单
@@ -97,7 +88,6 @@ public class User
         try
         {
             var api = "https://api.vc.bilibili.com/web_im/v1/web_im/send_msg";
-
 
             // 创建 HTTP 请求
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(api);
@@ -128,22 +118,23 @@ public class User
             // var source = HTTPUtil.GetPostResponseAsync(api, data, "application/x-www-form-urlencoded").Result;
             var json = JsonDocument.Parse(source).RootElement;
             int code = json.GetProperty("code").GetInt32();
-            if (code == 25003)
+            switch (code)
             {
-                Logger.LogWarn($"UID{receiverId}：{json.GetProperty("message").GetString()}");
-                return SendMessageResult.BlackList;
-            }
-            else if (code != 0)
-            {
-                Logger.LogDebug($"错误码：{code}；错误信息：{json.GetProperty("message").GetString()}");
-                return SendMessageResult.RequestError;
+                case 0:
+                    return code;
+                case 21045:
+                case 25003:
+                    Logger.LogWarn($"UID{receiverId}：{json.GetProperty("message").GetString()}");
+                    return code;
+                default:
+                    Logger.LogDebug($"错误码：{code}；错误信息：{json.GetProperty("message").GetString()}");
+                    return code;
             }
         }
         catch (Exception e)
         {
-            return SendMessageResult.HttpError;
+            return -2;
         }
-
-        return SendMessageResult.Success;
+        return 0;
     }
 }

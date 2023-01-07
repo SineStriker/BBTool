@@ -20,6 +20,12 @@ public static class Program
 
     public readonly static string APP_DATA_PATH = Path.Combine(APP_DIR, APP_DATA_FILE_NAME);
 
+    public readonly static Dictionary<long, string> SpecialErrors = new Dictionary<long, string>()
+    {
+        { 21045, "对陌生人最多主动发送一条私信" },
+        { 25003, "黑名单" },
+    };
+
     private static volatile bool RequestExit = false;
 
     private static volatile bool AcceptExit = false;
@@ -35,7 +41,8 @@ public static class Program
         }
 
         public static readonly int NumPerPage = 20;
-        public long Interval { get; set; } = 1000;
+        public long GetInterval { get; set; } = 1000;
+        public long MessageInterval { get; set; } = 5000;
         public string VideoId { get; set; } = "";
         public string Message { get; set; } = "";
         public Video.VideoInfo VideoInfo { get; set; } = new Video.VideoInfo();
@@ -43,7 +50,7 @@ public static class Program
         public CommentList Comments { get; set; } = new CommentList();
         public Dictionary<long, CommentList> SubComments { get; set; } = new Dictionary<long, CommentList>();
 
-        public List<long> BlackList = new List<long>();
+        public Dictionary<int, HashSet<long>> ErrorAttempts = new Dictionary<int, HashSet<long>>();
         public int MessageSent { get; set; } = 0;
 
         public bool IsValid()
@@ -74,7 +81,8 @@ public static class Program
 
         Console.WriteLine("选项：");
         Console.WriteLine("  {0,-15}{1}", "-f <file>", "使用消息文件，不需要指定消息内容");
-        Console.WriteLine("  {0,-15}{1}", "-t", "设置消息发送时间间隔（毫秒），默认值1000");
+        Console.WriteLine("  {0,-15}{1}", "-t1", "设置获取评论区信息时间间隔（毫秒），默认值1000");
+        Console.WriteLine("  {0,-15}{1}", "-t2", "设置发送消息时间间隔（毫秒），默认值5000");
         Console.WriteLine("  {0,-15}{1}", "--debug", "输出调试信息");
         Console.WriteLine("  {0,-15}{1}", "--recover", "尝试恢复上一次的事务");
         Console.WriteLine("  {0,-15}{1}", "-h, --help", "显示帮助");
@@ -84,7 +92,8 @@ public static class Program
     {
         // 解析命令行参数
         string msg_path = "";
-        long interval = 1000;
+        long interval1 = 1000;
+        long interval2 = 5000;
         bool recover = false;
 
         // 没有命令行参数
@@ -106,46 +115,52 @@ public static class Program
         {
             string arg = args[i];
             string nextArg = i < args.Length - 1 ? args[i + 1] : "";
-            if (arg == "-f")
-            {
-                // 文件
-                msg_path = nextArg;
-                i++;
-            }
-            else if (arg == "-t")
-            {
-                // 设置消息发送间隔
-                try
-                {
-                    interval = Int64.Parse(nextArg);
-                }
-                catch (Exception e)
-                {
-                    Console.Write($"参数错误");
-                    return -1;
-                }
 
-                i++;
-            }
-            else if (arg == "--debug")
+            try
             {
-                // 输出调试信息
-                Config.DEBUG_LOG = true;
+                if (arg == "-f")
+                {
+                    // 文件
+                    msg_path = nextArg;
+                    i++;
+                }
+                else if (arg == "-t1")
+                {
+                    // 设置消息发送间隔
+                    interval1 = Int64.Parse(nextArg);
+                    i++;
+                }
+                else if (arg == "-t2")
+                {
+                    // 设置消息发送间隔
+                    interval2 = Int64.Parse(nextArg);
+                    i++;
+                }
+                else if (arg == "--debug")
+                {
+                    // 输出调试信息
+                    Config.DEBUG_LOG = true;
+                }
+                else if (arg == "--recover")
+                {
+                    // 恢复模式
+                    recover = true;
+                }
+                else if (arg == "-h" || arg == "--help")
+                {
+                    // 显示帮助
+                    ShowHelp();
+                    return 0;
+                }
+                else if (!arg.StartsWith("-"))
+                {
+                    positionalArgs.Add(arg);
+                }
             }
-            else if (arg == "--recover")
+            catch (Exception e)
             {
-                // 恢复模式
-                recover = true;
-            }
-            else if (arg == "-h" || arg == "--help")
-            {
-                // 显示帮助
-                ShowHelp();
-                return 0;
-            }
-            else if (!arg.StartsWith("-"))
-            {
-                positionalArgs.Add(arg);
+                Console.Write($"参数错误");
+                return -1;
             }
         }
 
@@ -237,17 +252,24 @@ public static class Program
                 appData.Message = msg;
             }
 
-            if (interval != appData.Interval)
+            if (interval1 != appData.GetInterval)
             {
-                Logger.Log("使用新设置的时间间隔");
-                appData.Interval = interval;
+                Logger.Log("使用新设置的获取时间间隔");
+                appData.GetInterval = interval1;
+            }
+
+            if (interval2 != appData.MessageInterval)
+            {
+                Logger.Log("使用新设置的获取时间间隔");
+                appData.MessageInterval = interval2;
             }
         }
         else
         {
             appData = new AppData();
 
-            appData.Interval = interval;
+            appData.GetInterval = interval1;
+            appData.MessageInterval = interval2;
             appData.VideoId = vid;
             appData.Message = msg;
         }
@@ -327,7 +349,8 @@ public static class Program
         };
 
         // 依次获取根评论信息
-        Logger.Log($"获取根评论区所有用户信息，每页{AppData.NumPerPage}个，总共{appData.CommentCountInfo.Root}个...");
+        Logger.Log(
+            $"获取根评论区所有用户信息，每{appData.GetInterval}毫秒获取一页，每页{AppData.NumPerPage}个，总共{appData.CommentCountInfo.Root}个...");
         if (!appData.Comments.Over)
         {
             var total = appData.CommentCountInfo.Root;
@@ -350,7 +373,7 @@ public static class Program
                         bar.Report(list.Count);
 
                         // 避免发送请求太快，设置延时
-                        Thread.Sleep((int)appData.Interval);
+                        Thread.Sleep((int)appData.GetInterval);
 
                         if (comments.Count < AppData.NumPerPage)
                         {
@@ -376,7 +399,7 @@ public static class Program
         var subCommentIndex = 0;
 
         // 依次获取副评论区信息
-        Logger.Log($"获取副评论区所有用户信息，每页{AppData.NumPerPage}个，总共{subCommentTotal}个...");
+        Logger.Log($"获取副评论区所有用户信息，每{appData.GetInterval}毫秒获取一页，每页{AppData.NumPerPage}个，总共{subCommentTotal}个...");
         foreach (var item in appData.Comments.Values)
         {
             // 如果没有评论
@@ -417,7 +440,7 @@ public static class Program
                         bar.Report(subCommentIndex + list.Count);
 
                         // 避免发送请求太快，设置延时
-                        Thread.Sleep((int)appData.Interval);
+                        Thread.Sleep((int)appData.GetInterval);
 
                         if (comments.Count < AppData.NumPerPage)
                         {
@@ -459,7 +482,7 @@ public static class Program
         // return 0;
 
         // 发送消息
-        Logger.Log($"向所有用户发送消息...");
+        Logger.Log($"向所有用户发送消息，每{appData.MessageInterval}毫秒发送一次...");
         {
             var bar = new ProgressBar(appData.MessageSent, users.Count);
 
@@ -469,41 +492,62 @@ public static class Program
                 for (; i < users.Count; ++i)
                 {
                     var receiver = users[i];
-                    var res = User.SendMessage(userInfo.UserId, receiver, appData.Message);
-                    if (res == User.SendMessageResult.BlackList)
+                    var code = User.SendMessage(userInfo.UserId, receiver, appData.Message);
+                    if (code < 0)
                     {
-                        appData.BlackList.Add(receiver);
-                    }
-                    else if (res != User.SendMessageResult.Success)
-                    {
+                        // 必须中断的错误
+                        Logger.LogError("网络错误");
                         break;
                     }
 
+                    if (code == 21046)
+                    {
+                        // 频率过高
+                        Logger.LogError("发送消息频率过高");
+                        break;
+                    }
+
+                    if (code > 0)
+                    {
+                        // 记录遇到错误的用户
+                        HashSet<long> list;
+                        if (!appData.ErrorAttempts.TryGetValue(code, out list))
+                        {
+                            list = new HashSet<long>();
+                            appData.ErrorAttempts.Add(code, list);
+                        }
+
+                        list.Add(receiver);
+                    }
+
                     bar.Report(i);
+                    appData.MessageSent = i;
 
                     // 避免发送请求太快，设置延时
-                    Thread.Sleep((int)appData.Interval);
+                    Thread.Sleep((int)appData.MessageInterval);
                 }
 
                 return i;
             });
 
-            appData.MessageSent = task3Res.Result;
+            task3Res.Wait();
+
+            bar.Dispose();
         }
 
         if (appData.MessageSent == users.Count)
         {
-            MissionSuccess = true;
-
-            if (appData.BlackList.Any())
+            // 特殊错误一览
+            foreach (var item in appData.ErrorAttempts)
             {
-                Logger.LogWarn(
-                    $"因黑名单无法发送的用户：{string.Join(';', appData.BlackList.Select(item => { return item.ToString(); }))}");
+                string err;
+                if (SpecialErrors.TryGetValue(item.Key, out err))
+                {
+                    Logger.LogWarn($"{err}：{string.Join(';', item.Value.Select(item => { return item.ToString(); }))}");
+                }
             }
-        }
-        else
-        {
-            Logger.LogError("发送消息失败");
+
+            MissionSuccess = true;
         }
 
         return 0;
