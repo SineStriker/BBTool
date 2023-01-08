@@ -7,7 +7,7 @@ public class Logout : SimpleRequest
 {
     public override string ApiPattern => "http://passport.bilibili.com/login/exit/v2";
 
-    public bool Send(string cookie)
+    public async Task<bool> Send(string cookie)
     {
         string csrf = CookieUtil.GetCsrfToken(cookie);
         if (csrf == "")
@@ -21,6 +21,6 @@ public class Logout : SimpleRequest
             { "biliCSRF", csrf },
         };
 
-        return GetData(_ => _code == 0, () => Http.PostFormUrlEncoded(ImplementUrl(), fields, cookie), true);
+        return await GetData(_ => _code == 0, () => HttpNew.PostFormUrlEncoded(ImplementUrl(), fields, cookie), true);
     }
 }

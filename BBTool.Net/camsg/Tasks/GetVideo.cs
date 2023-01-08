@@ -47,7 +47,7 @@ public class GetVideo : BaseTask
                 // 获取视频信息
                 {
                     var api = new GetInfo();
-                    var info = api.Send(vid, Global.Cookie);
+                    var info = await api.Send(vid, Global.Cookie);
                     if (info == null)
                     {
                         Logger.LogError("获取视频信息失败");
@@ -60,7 +60,7 @@ public class GetVideo : BaseTask
                 // 获取评论信息
                 {
                     var api = new GetCommentCount();
-                    var info = api.Send(Data.VideoInfo.Avid, Global.Cookie);
+                    var info = await api.Send(Data.VideoInfo.Avid, Global.Cookie);
                     if (info == null)
                     {
                         Logger.LogError("获取评论数失败");

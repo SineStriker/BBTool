@@ -8,16 +8,16 @@ public class GetInfo : SimpleRequest
 {
     public override string ApiPattern => "https://api.bilibili.com/x/web-interface/nav";
 
-    public UserInfo Send(string cookie = "")
+    public async Task<UserInfo> Send(string cookie = "")
     {
-        return GetData(obj =>
+        return await GetData(obj =>
                 new UserInfo
                 {
                     IsLogin = obj.GetProperty("isLogin").GetBoolean(),
                     Mid = obj.GetProperty("mid").GetInt64(),
                     UserName = obj.GetProperty("uname").GetString(),
                 },
-            () => Http.Get(ImplementUrl(), cookie)
+            () => HttpNew.Get(ImplementUrl(), cookie)
         );
     }
 }

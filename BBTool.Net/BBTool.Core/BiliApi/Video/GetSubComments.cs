@@ -9,9 +9,9 @@ public class GetSubComments : SimpleRequest
     public override string ApiPattern =>
         "http://api.bilibili.com/x/v2/reply/reply?type=1&oid={0}&root={1}&ps={2}&pn={3}";
 
-    public List<CommentInfo> Send(long avid, long replyId, int numPerPage, int page, string cookie = "")
+    public async Task<List<CommentInfo>> Send(long avid, long replyId, int numPerPage, int page, string cookie = "")
     {
-        return GetData(obj =>
+        return await GetData(obj =>
             {
                 var comments = new List<CommentInfo>();
 
@@ -25,7 +25,7 @@ public class GetSubComments : SimpleRequest
                         var info = new CommentInfo();
                         info.Id = item.GetProperty("rpid").GetInt64();
                         info.Mid = item.GetProperty("mid").GetInt64();
-                        info.Message = item.GetProperty("content").GetProperty("message").GetString();
+                        info.Message = item.GetProperty("content").GetProperty("message").GetString()!;
                         info.Count = item.GetProperty("count").GetInt32();
 
                         comments.Add(info);
@@ -34,7 +34,7 @@ public class GetSubComments : SimpleRequest
 
                 return comments;
             },
-            () => Http.Get(ImplementUrl(avid, replyId, numPerPage, page), cookie)
+            () => HttpNew.Get(ImplementUrl(avid, replyId, numPerPage, page), cookie)
         );
     }
 }

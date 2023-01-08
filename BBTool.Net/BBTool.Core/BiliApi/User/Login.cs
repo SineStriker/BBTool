@@ -41,7 +41,7 @@ public class Login : SimpleRequest
         public string Url { get; set; }
     }
 
-    public string Send()
+    public async Task<string> Send()
     {
         string cookie = "";
 
@@ -50,12 +50,12 @@ public class Login : SimpleRequest
             Logger.Log("获取登录地址...");
 
             // 向服务器请求二维码
-            QRCodeGenerateResult qrcode = GetData(obj => new QRCodeGenerateResult
+            QRCodeGenerateResult qrcode = await GetData(obj => new QRCodeGenerateResult
                 {
-                    Url = obj.GetProperty("url").GetString(),
-                    Key = obj.GetProperty("qrcode_key").GetString(),
+                    Url = obj.GetProperty("url").GetString()!,
+                    Key = obj.GetProperty("qrcode_key").GetString()!,
                 },
-                () => Http.Get(ImplementUrl("generate")));
+                () => HttpNew.Get(ImplementUrl("generate")));
             if (qrcode == null)
             {
                 return "";
@@ -86,11 +86,11 @@ public class Login : SimpleRequest
                 // 清除上一次请求的信息
                 Reset();
 
-                QRCodePollResult pollRes = GetData(obj => new QRCodePollResult
+                QRCodePollResult pollRes = await GetData(obj => new QRCodePollResult
                 {
                     Code = obj.GetProperty("code").GetInt32(),
                     Url = obj.GetProperty("url").GetString(),
-                }, () => Http.Get(ImplementUrl($"poll?qrcode_key={qrcode.Key}")));
+                }, () => HttpNew.Get(ImplementUrl($"poll?qrcode_key={qrcode.Key}")));
 
                 if (pollRes == null)
                 {

@@ -25,7 +25,7 @@ public class Http
             request.Headers.Add("Cookie", cookie);
         }
 
-        // 读取相应信息
+        // 读取响应信息
         string source;
         using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
         {
@@ -64,7 +64,7 @@ public class Http
             reqStream.Close();
         }
 
-        // 读取相应信息
+        // 读取响应信息
         string source;
         using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
         {

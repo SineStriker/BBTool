@@ -11,7 +11,7 @@ public static class Program
     public static int Main(string[] args)
     {
         Global.EnableDebug = true;
-        
+
         var argsSet = args.ToHashSet();
 
         string cookie = "";
@@ -21,16 +21,16 @@ public static class Program
             Logger.Log("测试登录");
             {
                 var api = new Login();
-                cookie = api.Send();
+                cookie = api.Send().Result;
                 if (string.IsNullOrEmpty(cookie))
                 {
                     Logger.LogError(api.ErrorMessage);
                     return 0;
                 }
             }
-            
+
             File.WriteAllText(CookiePath, cookie);
-            
+
             Logger.LogColor($"{cookie}");
         }
         else
@@ -41,7 +41,7 @@ public static class Program
         Logger.Log("测试登出");
         {
             var api = new Logout();
-            api.Send(cookie);
+            api.Send(cookie).Wait();
             if (api.Code != 0)
             {
                 Logger.LogError(api.ErrorMessage);

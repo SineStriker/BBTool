@@ -29,7 +29,7 @@ public class WorkContent
     {
         ArgumentHelpName = "timeout",
     };
-    
+
     public class WorkOption
     {
         public bool UseConfigFile = false;
@@ -108,7 +108,6 @@ public class WorkContent
         if (File.Exists(Global.CookiePath))
         {
             Logger.Log("加载本地cookie...");
-            Logger.LogDebug("文件路径：{0}", Global.CookiePath);
             Global.Cookie = File.ReadAllText(Global.CookiePath);
         }
 
@@ -117,7 +116,7 @@ public class WorkContent
         UserInfo user;
         {
             var api = new GetInfo();
-            user = api.Send(Global.Cookie);
+            user = await api.Send(Global.Cookie);
             if (UserInfo.IsNullOrOff(user))
             {
                 Logger.LogWarn("你尚未登录B站账号, 无法进行后续操作");

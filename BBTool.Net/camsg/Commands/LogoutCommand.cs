@@ -21,7 +21,7 @@ public class LogoutCommand : Command
         }
 
         var api = new Logout();
-        var res = api.Send(File.ReadAllText(info.FullName));
+        var res = await api.Send(File.ReadAllText(info.FullName));
         if (api.Code != 0)
         {
             Logger.LogError(api.ErrorMessage);
@@ -38,6 +38,7 @@ public class LogoutCommand : Command
         }
 
         // 删除Cookie
+        Logger.Log($"删除本地cookie");
         info.Delete();
     }
 }

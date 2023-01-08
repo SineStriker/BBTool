@@ -38,13 +38,14 @@ public abstract class SimpleRequest : IBiliApi
     /// <param name="checkCode">是否检查返回值是否为0</param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    protected T GetData<T>(Func<JsonElement, T> parseData, Func<string> doRequest, bool ignoreNonJsonFormat = false,
+    protected async Task<T> GetData<T>(Func<JsonElement, T> parseData, Func<Task<string>> doRequest,
+        bool ignoreNonJsonFormat = false,
         bool checkCode = true)
     {
         bool jsonParseOver = false;
         try
         {
-            var source = doRequest();
+            var source = await doRequest();
 
             // 解析为 Json
             var json = JsonDocument.Parse(source).RootElement;

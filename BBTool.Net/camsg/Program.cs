@@ -40,8 +40,8 @@ public static class Program
             }
         });
 
-        parserBuilder.UseHelp(new[] { "-h", "--help" });
-        parserBuilder.UseVersionOption(new[] { "-v", "--version" });
+        parserBuilder.UseHelp("-h", "--help");
+        parserBuilder.UseVersionOption("-v", "--version");
         parserBuilder.UseDefaults();
 
         // 开始解析

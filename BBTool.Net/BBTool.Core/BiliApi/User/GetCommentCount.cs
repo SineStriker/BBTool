@@ -13,15 +13,15 @@ public class GetCommentCount : SimpleRequest
         return string.Format(ApiPattern, avid);
     }
 
-    public CommentCount Send(long avid, string cookie = "")
+    public async Task<CommentCount> Send(long avid, string cookie = "")
     {
-        return GetData(obj =>
+        return await GetData(obj =>
                 new CommentCount
                 {
                     Root = obj.GetProperty("page").GetProperty("count").GetInt32(),
                     Total = obj.GetProperty("page").GetProperty("acount").GetInt32(),
                 },
-            () => Http.Get(ImplementUrl(avid), cookie)
+            () => HttpNew.Get(ImplementUrl(avid), cookie)
         );
     }
 }

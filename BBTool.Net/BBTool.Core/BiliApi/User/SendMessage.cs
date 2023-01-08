@@ -23,7 +23,7 @@ public class SendMessage : SimpleRequest
         BlackList = 25003,
     }
 
-    public bool Send(int senderId, int receiverId, string message, string cookie)
+    public async Task<bool> Send(int senderId, int receiverId, string message, string cookie)
     {
         string csrf = CookieUtil.GetCsrfToken(cookie);
         if (csrf == "")
@@ -46,6 +46,6 @@ public class SendMessage : SimpleRequest
             { "csrf", csrf },
         };
 
-        return GetData(_ => _code == 0, () => Http.PostFormUrlEncoded(ImplementUrl(), fields, cookie));
+        return await GetData(_ => _code == 0, () => HttpNew.PostFormUrlEncoded(ImplementUrl(), fields, cookie));
     }
 }
