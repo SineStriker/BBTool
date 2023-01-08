@@ -2,16 +2,18 @@
 using System.Text.Json;
 using System.Text.Unicode;
 
-namespace CmtMsg;
+namespace BBTool.Core.LowLevel;
 
 public class Sys
 {
-    public static JsonSerializerOptions UnicodeJsonSerializeOption()
+    public static JsonSerializerOptions UnicodeJsonSerializeOption(bool indented = false)
     {
         var opt = new JsonSerializerOptions();
         opt.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
+        opt.WriteIndented = indented;
         return opt;
     }
+
 
     public static string GetDevId()
     {
@@ -44,5 +46,17 @@ public class Sys
         long lTime = long.Parse(timeStamp + "0000000");
         TimeSpan toNow = new TimeSpan(lTime);
         return dtStart.Add(toNow);
+    }
+
+    public static T GetMember<T>(object obj, string key)
+    {
+        var prop = obj.GetType().GetProperty(key);
+        Console.WriteLine($"prop: {prop == null}");
+        if (prop != null && prop.GetValue(obj) is T val)
+        {
+            return val;
+        }
+
+        return default;
     }
 }

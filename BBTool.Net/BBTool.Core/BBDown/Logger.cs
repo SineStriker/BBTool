@@ -1,4 +1,6 @@
-﻿namespace BBDown.Core
+﻿using BBTool.Core;
+
+namespace BBDown.Core
 {
     public class Logger
     {
@@ -45,7 +47,7 @@
 
         public static void LogDebug(string toFormat, params object[] args)
         {
-            if (Config.DEBUG_LOG)
+            if (Global.EnableDebug)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write(DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]") + " - ");

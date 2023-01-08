@@ -8,93 +8,20 @@ using System.Text.RegularExpressions;
 using System.Web;
 using BBDown;
 using BBDown.Core;
-using CmtMsg;
+
+namespace CmtMsg;
 
 public static class Program
 {
-    public readonly static string APP_NAME = Path.GetFileNameWithoutExtension(Environment.ProcessPath)!;
-
-    public readonly static string APP_DIR = Path.GetDirectoryName(Environment.ProcessPath)!;
-
-    public readonly static string APP_DATA_FILE_NAME = "CmtMsg.data.json";
-
-    public readonly static string APP_DATA_PATH = Path.Combine(APP_DIR, APP_DATA_FILE_NAME);
-
-    public readonly static Dictionary<long, string> SpecialErrors = new Dictionary<long, string>()
-    {
-        { 21045, "对陌生人最多主动发送一条私信" },
-        { 25003, "黑名单" },
-    };
-
     private static volatile bool RequestExit = false;
 
     private static volatile bool AcceptExit = false;
 
     private static volatile bool MissionSuccess = false;
 
-    public class AppData
-    {
-        public class CommentList
-        {
-            public List<Video.CommentInfo> Values { get; set; } = new List<Video.CommentInfo>();
-            public bool Over { get; set; } = false;
-        }
-
-        public static readonly int NumPerPage = 20;
-        public long GetInterval { get; set; } = 1000;
-        public long MessageInterval { get; set; } = 5000;
-        public string VideoId { get; set; } = "";
-        public string Message { get; set; } = "";
-        public Video.VideoInfo VideoInfo { get; set; } = new Video.VideoInfo();
-        public Video.CommentCountInfo CommentCountInfo { get; set; } = new Video.CommentCountInfo();
-        public CommentList Comments { get; set; } = new CommentList();
-        public Dictionary<long, CommentList> SubComments { get; set; } = new Dictionary<long, CommentList>();
-
-        public Dictionary<int, HashSet<long>> ErrorAttempts = new Dictionary<int, HashSet<long>>();
-        public int MessageSent { get; set; } = 0;
-
-        public bool IsValid()
-        {
-            if (!VideoId.Any() || !Message.Any())
-            {
-                return false;
-            }
-
-            if (VideoInfo.Avid < 0 || CommentCountInfo.Root < 0 || CommentCountInfo.Total < 0)
-            {
-                return false;
-            }
-
-            return true;
-        }
-    }
-
-    private static void ShowHelp()
-    {
-        Console.WriteLine("简介：");
-        Console.WriteLine("  {0}", "给指定的B站视频评论区用户批量发送私信。");
-        Console.WriteLine();
-
-        Console.WriteLine("用法：");
-        Console.WriteLine("  {0}", $"{APP_NAME} <视频id> [选项] [消息内容]");
-        Console.WriteLine();
-
-        Console.WriteLine("选项：");
-        Console.WriteLine("  {0,-15}{1}", "-f <file>", "使用消息文件，不需要指定消息内容");
-        Console.WriteLine("  {0,-15}{1}", "-t1", "设置获取评论区信息时间间隔（毫秒），默认值1000");
-        Console.WriteLine("  {0,-15}{1}", "-t2", "设置发送消息时间间隔（毫秒），默认值5000");
-        Console.WriteLine("  {0,-15}{1}", "--debug", "输出调试信息");
-        Console.WriteLine("  {0,-15}{1}", "--recover", "尝试恢复上一次的事务");
-        Console.WriteLine("  {0,-15}{1}", "-h, --help", "显示帮助");
-    }
-
     public static int MainRoutine(string[] args)
     {
         // 解析命令行参数
-        string msg_path = "";
-        long interval1 = 1000;
-        long interval2 = 5000;
-        bool recover = false;
 
         // 没有命令行参数
         if (!args.Any())
@@ -109,63 +36,7 @@ public static class Program
                 return 0;
             }
         }
-
-        var positionalArgs = new List<string>();
-        for (int i = 0; i < args.Length; ++i)
-        {
-            string arg = args[i];
-            string nextArg = i < args.Length - 1 ? args[i + 1] : "";
-
-            try
-            {
-                if (arg == "-f")
-                {
-                    // 文件
-                    msg_path = nextArg;
-                    i++;
-                }
-                else if (arg == "-t1")
-                {
-                    // 设置消息发送间隔
-                    interval1 = Int64.Parse(nextArg);
-                    i++;
-                }
-                else if (arg == "-t2")
-                {
-                    // 设置消息发送间隔
-                    interval2 = Int64.Parse(nextArg);
-                    i++;
-                }
-                else if (arg == "--debug")
-                {
-                    // 输出调试信息
-                    Config.DEBUG_LOG = true;
-                }
-                else if (arg == "--recover")
-                {
-                    // 恢复模式
-                    recover = true;
-                }
-                else if (arg == "-h" || arg == "--help")
-                {
-                    // 显示帮助
-                    ShowHelp();
-                    return 0;
-                }
-                else if (!arg.StartsWith("-"))
-                {
-                    positionalArgs.Add(arg);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.Write($"参数错误");
-                return -1;
-            }
-        }
-
-        string vid = positionalArgs.Any() ? positionalArgs.First() : "";
-        string msg = positionalArgs.Count > 1 ? positionalArgs[1] : "";
+        
         if (msg_path.Any())
         {
             try
@@ -252,24 +123,24 @@ public static class Program
                 appData.Message = msg;
             }
 
-            if (interval1 != appData.GetInterval)
+            if (get_timeout != appData.GetInterval)
             {
                 Logger.Log("使用新设置的获取时间间隔");
-                appData.GetInterval = interval1;
+                appData.GetInterval = get_timeout;
             }
 
-            if (interval2 != appData.MessageInterval)
+            if (msg_timeout != appData.MessageInterval)
             {
                 Logger.Log("使用新设置的获取时间间隔");
-                appData.MessageInterval = interval2;
+                appData.MessageInterval = msg_timeout;
             }
         }
         else
         {
             appData = new AppData();
 
-            appData.GetInterval = interval1;
-            appData.MessageInterval = interval2;
+            appData.GetInterval = get_timeout;
+            appData.MessageInterval = msg_timeout;
             appData.VideoId = vid;
             appData.Message = msg;
         }
@@ -503,7 +374,7 @@ public static class Program
                     if (code == 21046)
                     {
                         // 频率过高
-                        Logger.LogError("发送消息频率过高");
+                        Logger.LogError("发送消息频率过高，如果继续使用此账号，则需要等待较长时间");
                         break;
                     }
 

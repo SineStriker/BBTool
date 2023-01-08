@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Bilibili\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="Bilibili\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Bilibili\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="QRCoder" Version="1.4.3" />
+    </ItemGroup>
+
+</Project>
