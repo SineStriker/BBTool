@@ -2,17 +2,33 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
+        <Version>1.0.2</Version>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BBTool.Core\BBTool.Core.csproj" />
+        <ProjectReference Include="..\BBTool.Core\BBTool.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    </ItemGroup>
+    
+    <PropertyGroup>
+        <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+        <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+        <PublishAot>true</PublishAot>
+        <EventSourceSupport>false</EventSourceSupport>
+        <UseSystemResourceKeys>true</UseSystemResourceKeys>
+        <InvariantGlobalization>true</InvariantGlobalization>
+        <StripSymbols>true</StripSymbols>
+        <ObjCopyName Condition="'$(RuntimeIdentifier)' == 'linux-arm64'">aarch64-linux-gnu-objcopy</ObjCopyName>
+    </PropertyGroup>
+
+    <ItemGroup Condition="'$(PublishAot)' == 'true' and '$(RuntimeIdentifier)' != 'win-arm64' and '$(RuntimeIdentifier)' != 'linux-arm64'">
+        <PackageReference Include="PublishAotCompressed" Version="0.0.4" />
     </ItemGroup>
 
 </Project>
