@@ -52,8 +52,7 @@ public abstract class SimpleRequest : IBiliApi
             jsonParseOver = true;
 
             // 之后的 Json 异常均不忽略
-            JsonElement code;
-            if (json.TryGetProperty("code", out code))
+            if (json.TryGetProperty("code", out var code))
             {
                 _code = code.GetInt32();
             }
@@ -64,11 +63,10 @@ public abstract class SimpleRequest : IBiliApi
 
             if (checkCode && _code != 0)
             {
-                return Fail<T>(json.GetProperty("message").GetString());
+                return Fail<T>(json.GetProperty("message").GetString()!);
             }
 
-            JsonElement data;
-            if (json.TryGetProperty("data", out data))
+            if (json.TryGetProperty("data", out var data))
             {
                 return parseData(data);
             }

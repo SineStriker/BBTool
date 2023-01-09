@@ -8,6 +8,8 @@ using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Commands.Extensions;
 using BBTool.Config.Files;
+using BBTool.Config.Tasks;
+using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.LowLevel;
 using Camsg.Commands;
 using Camsg.Tasks;
@@ -20,7 +22,7 @@ public static class Program
     {
         // 添加终端编码信息
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-        
+
         // 设置默认配置信息
         MessageTool.Config = new MessageConfig();
 
@@ -51,7 +53,7 @@ public static class Program
     static async Task WorkRoutine(InvocationContext context)
     {
         // 获取用户信息
-        var task0 = new CheckUserTask();
+        var task0 = new CheckUser();
         if (!await task0.Run())
         {
             return;
@@ -60,14 +62,18 @@ public static class Program
         var user = task0.Data;
         Console.WriteLine();
 
-        // 删除旧的日志
-        if (!MessageTool.RecoveryMode)
+        // 为了防止输错命令导致误删，将清理工作延迟到第一个任务日志保存前
+        var initDirAction = () =>
         {
-            Sys.RemoveDirRecursively(MessageTool.AppLogDir);
-        }
+            // 删除旧的日志
+            if (!MessageTool.RecoveryMode)
+            {
+                Sys.RemoveDirRecursively(MessageTool.AppLogDir);
+            }
 
-        Directory.CreateDirectory(MessageTool.AppLogDir);
-        Directory.CreateDirectory(MessageTool.AppHistoryDir);
+            Directory.CreateDirectory(MessageTool.AppLogDir);
+            Directory.CreateDirectory(MessageTool.AppHistoryDir);
+        };
 
         // 全局捕获关闭事件
         MessageTool.InstallInterruptFilter();
@@ -76,22 +82,15 @@ public static class Program
         Logger.Log("第一步");
 
         // 获取视频内容
-        var task1 = new GetVideo();
-        if (!await task1.Run(Global.VideoId))
+        var task1 = new GetVideo(1);
+        if (!await task1.Run(initDirAction))
         {
             return;
         }
 
         var videoInfo = task1.Data.VideoInfo;
         var commentInfo = task1.Data.CommentInfo;
-
-        // 检查是否有消息内容
         string message = Global.Config.Message;
-        if (string.IsNullOrEmpty(message))
-        {
-            Logger.LogWarn("缺少消息内容");
-            return;
-        }
 
         Console.WriteLine();
 
@@ -103,7 +102,7 @@ public static class Program
             $"获取根评论区所有用户信息，每{Global.Config.GetTimeout}毫秒获取一页，每页{MessageConfig.NumPerPage}个，总共{commentInfo.Root}个...");
 
         // 获取根评论区
-        var task2 = new CollectRoot();
+        var task2 = new CollectRoot(2);
         if (!await task2.Run(videoInfo.Avid, commentInfo.Root))
         {
             return;
@@ -119,7 +118,7 @@ public static class Program
             $"获取副评论区所有用户信息，每{Global.Config.GetTimeout}毫秒获取一页，每页{MessageConfig.NumPerPage}个，总共{subCount}个...");
 
         // 获取副评论区
-        var task3 = new CollectSub();
+        var task3 = new CollectSub(3);
         if (!await task3.Run(videoInfo.Avid, rootComments))
         {
             return;
@@ -127,6 +126,7 @@ public static class Program
 
         var subCommands = task3.Data.SubComments;
 
+        // 去重
         var users = new List<MidNamePair>();
         {
             var userMap = new Dictionary<long, MidNamePair>();
@@ -169,11 +169,13 @@ public static class Program
         // return;
 
         // 发送消息
-        var task4 = new BatchMessage();
+        var task4 = new BatchMessage(4);
         if (!await task4.Run(user.Mid, users, message))
         {
             return;
         }
+
+        var batchResult = task4.Data;
 
         // 特殊错误一览
         // ...
@@ -188,12 +190,12 @@ public static class Program
             {
                 Avid = videoInfo.Avid,
                 Users = users.Select(item => item.Mid).ToList(),
-                ErrorAttempts = task4.SendProgress.ErrorAttempts,
+                ErrorAttempts = batchResult.ErrorAttempts,
             };
 
             var filename = DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".json";
             var path = Path.Combine(MessageTool.AppHistoryDir, filename);
-            File.WriteAllText(path, JsonSerializer.Serialize(history, Sys.UnicodeJsonSerializeOption()));
+            await File.WriteAllTextAsync(path, JsonSerializer.Serialize(history, Sys.UnicodeJsonSerializeOption()));
             Logger.Log($"保存本次任务信息到\"{filename}\"中");
         }
     }

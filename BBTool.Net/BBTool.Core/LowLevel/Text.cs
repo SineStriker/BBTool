@@ -2,7 +2,7 @@
 
 namespace BBTool.Core.LowLevel;
 
-public class Text
+public static class Text
 {
     public static string ElideString(string s, int len)
     {

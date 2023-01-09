@@ -2,6 +2,7 @@
 
 using BBDown.Core;
 using BBTool.Config;
+using BBTool.Config.Tasks;
 using BBTool.Core;
 using BBTool.Core.BiliApi.Login;
 
@@ -22,11 +23,12 @@ public static class Program
             Logger.Log("测试登录");
             {
                 var task = new LoginTask();
-                cookie = task.Run().Result;
-                if (string.IsNullOrEmpty(cookie))
+                if (!task.Run().Result)
                 {
                     return 0;
                 }
+
+                cookie = task.Data;
             }
 
             File.WriteAllText(CookiePath, cookie);

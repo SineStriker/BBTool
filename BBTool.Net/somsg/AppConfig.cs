@@ -11,17 +11,41 @@ public class AppConfig : MessageConfig
         喵星人 = 218,
     }
 
-    public static int DefaultPartition1 = (int)Partition.动物圈;
+    public enum SortOrder
+    {
+        [Description("综合排序")] //
+        TotalRank,
 
-    public static int DefaultPartition2 = (int)Partition.喵星人;
+        [Description("最多点击")] //
+        Click,
+
+        [Description("最新发布")] //
+        PubDate,
+
+        [Description("最多弹幕")] //
+        DM,
+
+        [Description("最多收藏")] //
+        STOW,
+
+        [Description("最多评论")] //
+        Scores,
+    }
+
+    public static Partition DefaultPartition = Partition.喵星人;
+
+    public static SortOrder DefaultSortOrder = SortOrder.PubDate;
 
     /// <summary>
     /// 默认分区
     /// </summary>
-    public int Partition1 { get; set; } = DefaultPartition1;
-
     /// <summary>
     /// 默认子分区
     /// </summary>
-    public int Partition2 { get; set; } = DefaultPartition2;
+    public int PartitionNum { get; set; } = (int)DefaultPartition;
+
+    /// <summary>
+    /// 排序方式
+    /// </summary>
+    public int SortOrderNum { get; set; } = (int)DefaultSortOrder;
 }

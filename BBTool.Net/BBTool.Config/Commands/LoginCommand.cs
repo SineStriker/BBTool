@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using BBDown.Core;
+using BBTool.Config.Tasks;
 
 namespace BBTool.Config.Commands;
 
@@ -13,12 +14,13 @@ public class LoginCommand : Command
     private async Task Routine()
     {
         var task = new LoginTask();
-        var cookie = await task.Run();
-        if (string.IsNullOrEmpty(cookie))
+        if (!await task.Run())
         {
             // 登录失败
             return;
         }
+
+        var cookie = task.Data;
 
         // 写入Cookie
         Logger.Log($"保存本地cookie");

@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.ComponentModel;
 using System.Text.Json;
 using BBTool.Core.LowLevel;
 

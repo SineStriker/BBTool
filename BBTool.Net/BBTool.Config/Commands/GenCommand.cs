@@ -50,6 +50,7 @@ public class GenConfigCommand : Command
 
         // 生成默认配置信息后退出
         // File.WriteAllText(info.FullName, JsonSerializer.Serialize(conf, AOT.Json.AppConfigCTX.Type));
-        File.WriteAllText(info.FullName, JsonSerializer.Serialize(conf, Sys.UnicodeJsonSerializeOption(true)));
+        await File.WriteAllTextAsync(info.FullName,
+            JsonSerializer.Serialize(conf, Sys.UnicodeJsonSerializeOption(true)));
     }
 }

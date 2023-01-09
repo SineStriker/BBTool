@@ -16,8 +16,7 @@ public class GetRecentTalk : SimpleRequest
             {
                 var msgList = new List<MessageInfo>();
 
-                JsonElement messages;
-                if (obj.TryGetProperty("messages", out messages) && messages.ValueKind == JsonValueKind.Array)
+                if (obj.TryGetProperty("messages", out var messages) && messages.ValueKind == JsonValueKind.Array)
                 {
                     foreach (var item in messages.EnumerateArray())
                     {

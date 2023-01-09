@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using BBTool.Config.Tasks;
 
 namespace BBTool.Config.Commands;
 
@@ -11,7 +12,7 @@ public class LogStateCommand : Command
 
     private async Task Routine()
     {
-        var task = new CheckUserTask();
+        var task = new CheckUser();
         if (!await task.Run())
         {
             // 网络错误或用户未登录

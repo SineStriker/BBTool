@@ -2,9 +2,9 @@
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.User;
 
-namespace BBTool.Config;
+namespace BBTool.Config.Tasks;
 
-public class CheckUserTask : BaseTask
+public class CheckUser : BaseTask
 {
     public UserInfo Data { get; set; } = null;
 

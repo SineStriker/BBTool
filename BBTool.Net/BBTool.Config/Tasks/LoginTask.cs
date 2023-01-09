@@ -6,7 +6,7 @@ using BBTool.Core.BiliApi.Login;
 using BBTool.Core.BiliApi.Entities;
 using QRCoder;
 
-namespace BBTool.Config;
+namespace BBTool.Config.Tasks;
 
 public class LoginTask : BaseTask
 {
@@ -20,7 +20,9 @@ public class LoginTask : BaseTask
     /// </summary>
     public static int LoginPollTimeout = 2000;
 
-    public async Task<string> Run()
+    public string Data = "";
+
+    public async Task<bool> Run()
     {
         string cookie = "";
 
@@ -49,7 +51,7 @@ public class LoginTask : BaseTask
                     if (qrcode == null)
                     {
                         Logger.LogError(api.ErrorMessage);
-                        return "";
+                        return false;
                     }
                 }
 
@@ -147,6 +149,13 @@ public class LoginTask : BaseTask
             }
         }
 
-        return cookie;
+        if (string.IsNullOrEmpty(cookie))
+        {
+            return false;
+        }
+
+        Data = cookie;
+
+        return true;
     }
 }

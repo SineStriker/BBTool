@@ -1,10 +1,12 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.ComponentModel;
+using System.Reflection;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
 namespace BBTool.Core.LowLevel;
 
-public class Sys
+public static class Sys
 {
     public static JsonSerializerOptions UnicodeJsonSerializeOption(bool indented = false)
     {
@@ -57,6 +59,17 @@ public class Sys
         }
 
         return default;
+    }
+
+    public static string GetEnumDescription(Enum enumValue)
+    {
+        string value = enumValue.ToString();
+        FieldInfo field = enumValue.GetType().GetField(value);
+        object[] objs = field.GetCustomAttributes(typeof(DescriptionAttribute), false); //获取描述属性
+        if (objs == null || objs.Length == 0) //当描述属性没有时，直接返回名称
+            return value;
+        DescriptionAttribute descriptionAttribute = (DescriptionAttribute)objs[0];
+        return descriptionAttribute.Description;
     }
 
     public static bool RemoveDirRecursively(string path)

@@ -9,15 +9,16 @@ namespace Somsg.Commands;
 public class SearchAffix : MessageAffix<AppConfig>
 {
     // 选项
-    public Option<int> S1 = new("-s1", $"分区号，默认值{(int)AppConfig.Partition.动物圈}({AppConfig.Partition.动物圈.ToString()})")
+    public Option<int> Partition = new("-s", $"分区号，默认值{(int)AppConfig.DefaultPartition}（{AppConfig.DefaultPartition.ToString()}）")
     {
-        ArgumentHelpName = "tid1",
+        ArgumentHelpName = "tid",
     };
 
-    public Option<int> S2 = new("-s2", $"子分区号，默认值{(int)AppConfig.Partition.喵星人}({AppConfig.Partition.喵星人.ToString()})")
-    {
-        ArgumentHelpName = "tid2",
-    };
+    public Option<int> Order =
+        new(new[] { "-r", "--order" }, $"排序方式代号，综合0/最热1/最新2/弹幕3/收藏4/评论5，默认为{(int)AppConfig.DefaultSortOrder}")
+        {
+            ArgumentHelpName = "code",
+        };
 
     public SearchAffix(Command command) : base(command)
     {
@@ -27,8 +28,8 @@ public class SearchAffix : MessageAffix<AppConfig>
     {
         base.Setup();
 
-        Command.Add(S1);
-        Command.Add(S2);
+        Command.Add(Partition);
+        Command.Add(Order);
     }
 
     public override void ResolveResult(InvocationContext context)
@@ -37,14 +38,14 @@ public class SearchAffix : MessageAffix<AppConfig>
 
         var res = context.ParseResult;
 
-        if (res.HasOption(S1) && !UseConfigFile)
+        if (res.HasOption(Partition) && !UseConfigFile)
         {
-            Global.Config.Partition1 = res.GetValueForOption(S1);
+            Global.Config.PartitionNum = res.GetValueForOption(Partition);
         }
 
-        if (res.HasOption(S2) && !UseConfigFile)
+        if (res.HasOption(Order) && !UseConfigFile)
         {
-            Global.Config.Partition2 = res.GetValueForOption(S2);
+            Global.Config.SortOrderNum = res.GetValueForOption(Order);
         }
     }
 }

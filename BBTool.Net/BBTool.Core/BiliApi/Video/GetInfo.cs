@@ -15,9 +15,8 @@ public class GetInfo : SimpleRequest
             {
                 var owner = obj.GetProperty("owner");
                 var staffList = new List<StaffInfo>();
-                JsonElement staff;
 
-                if (owner.TryGetProperty("staff", out staff))
+                if (owner.TryGetProperty("staff", out var staff))
                 {
                     // 如果存在多个成员
                     foreach (var item in staff.EnumerateArray())

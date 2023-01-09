@@ -2,6 +2,19 @@
 
 namespace BBTool.Core.BiliApi.Entities;
 
+public class MidNamePair
+{
+    public long Mid { get; }
+
+    public string Name { get; }
+
+    public MidNamePair(long mid, string name)
+    {
+        Mid = mid;
+        Name = name;
+    }
+}
+
 public class UserInfo
 {
     /// <summary>

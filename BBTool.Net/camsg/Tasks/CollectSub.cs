@@ -1,6 +1,7 @@
 ﻿using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Files;
+using BBTool.Config.Tasks;
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.LowLevel;
 using BBTool.Core.BiliApi.Video;
@@ -9,9 +10,11 @@ namespace Camsg.Tasks;
 
 public class CollectSub : BaseTask
 {
-    public override int TaskId => 3;
-
     public SubCommentProgress Data { get; set; } = new();
+    
+    public CollectSub(int tid) : base(tid)
+    {
+    }
 
     public async Task<bool> Run(long avid, List<CommentInfo> rootComments)
     {

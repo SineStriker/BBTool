@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using BBDown.Core;
 using BBTool.Config;
+using BBTool.Config.Tasks;
 using BBTool.Core.BiliApi.Video;
-
 using GetUserInfo = BBTool.Core.BiliApi.User.GetInfo;
 using GetVideoInfo = BBTool.Core.BiliApi.Video.GetInfo;
 
@@ -10,12 +10,16 @@ namespace Camsg.Tasks;
 
 public class GetVideo : BaseTask
 {
-    public override int TaskId => 1;
-
     public TaskBaseInfo Data { get; set; } = new();
 
-    public async Task<bool> Run(string vid)
+    public GetVideo(int tid) : base(tid)
     {
+    }
+
+    public async Task<bool> Run(Action beforeSave = null)
+    {
+        string vid = Global.VideoId;
+
         if (MessageTool.RecoveryMode && DataExists)
         {
             Logger.Log("从日志中获取视频信息...");
@@ -31,10 +35,18 @@ public class GetVideo : BaseTask
             }
 
             // 若本次未指定消息内容
-            if (!string.IsNullOrEmpty(Data.SavedMessage) && string.IsNullOrEmpty(MessageTool.Config.Message))
+            if (string.IsNullOrEmpty(MessageTool.Config.Message))
             {
-                Logger.Log($"由于没有指定消息内容，使用日志中保存的代替");
-                MessageTool.Config.Message = Data.SavedMessage;
+                if (!string.IsNullOrEmpty(Data.SavedMessage))
+                {
+                    Logger.Log($"由于没有指定消息内容，使用日志中保存的代替");
+                    MessageTool.Config.Message = Data.SavedMessage;
+                }
+                else
+                {
+                    Logger.LogWarn("缺少消息内容");
+                    return false;
+                }
             }
         }
         else
@@ -57,7 +69,7 @@ public class GetVideo : BaseTask
                         Logger.LogError($"获取视频信息失败：{api.ErrorMessage}");
                         return false;
                     }
-                
+
                     Logger.LogDebug($"AV号：{info.Avid}");
                     Logger.LogColor($"作者：{info.UserName}");
                     Logger.LogColor($"发布日期：{info.PublishTime}");
@@ -76,7 +88,7 @@ public class GetVideo : BaseTask
                         Logger.LogError($"获取评论数失败：{api.ErrorMessage}");
                         return false;
                     }
-                    
+
                     Logger.LogColor($"评论数：{info.Total}");
 
                     Data.CommentInfo = info;
@@ -88,8 +100,20 @@ public class GetVideo : BaseTask
                 return false;
             }
 
+            // 检查是否有消息内容
+            if (string.IsNullOrEmpty(Global.Config.Message))
+            {
+                Logger.LogWarn("缺少消息内容");
+                return false;
+            }
+
             // 保存消息内容
             Data.SavedMessage = Global.Config.Message;
+            
+            if (beforeSave != null)
+            {
+                beforeSave.Invoke();
+            }
 
             // 保存日志
             SaveData(Data);

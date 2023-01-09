@@ -4,11 +4,11 @@ using BBDown.Core;
 using BBTool.Config;
 using BBTool.Core.LowLevel;
 
-namespace BBTool.Config;
+namespace BBTool.Config.Tasks;
 
 public class BaseTask
 {
-    public virtual int TaskId { get; } = -1;
+    public int TaskId => _taskId;
 
     public virtual string TaskLogDir => MessageTool.AppLogDir;
 
@@ -18,8 +18,11 @@ public class BaseTask
 
     public void RemoveData() => Sys.RemoveFile(DataPath);
 
-    public BaseTask()
+    private int _taskId = -1;
+
+    public BaseTask(int tid = -1)
     {
+        _taskId = tid;
     }
 
     public T LoadData<T>()

@@ -1,14 +1,17 @@
 ﻿using BBDown.Core;
 using BBTool.Config;
+using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.User;
 
-namespace Camsg.Tasks;
+namespace BBTool.Config.Tasks;
 
 public class BatchMessage : BaseTask
 {
-    public override int TaskId => 4;
+    public SendProgress Data { get; set; } = new();
 
-    public SendProgress SendProgress { get; set; } = new();
+    public BatchMessage(int tid) : base(tid)
+    {
+    }
 
     public async Task<bool> Run(long sender, List<MidNamePair> receivers, string message)
     {
@@ -18,7 +21,7 @@ public class BatchMessage : BaseTask
 
             try
             {
-                SendProgress = LoadData<SendProgress>();
+                Data = LoadData<SendProgress>();
             }
             catch (Exception e)
             {
@@ -30,7 +33,7 @@ public class BatchMessage : BaseTask
         using (var guard = new LocalTaskGuard())
         {
             {
-                int i = SendProgress.Progress;
+                int i = Data.Progress;
                 int n = receivers.Count;
                 for (; i < n; ++i)
                 {
@@ -85,10 +88,10 @@ public class BatchMessage : BaseTask
                         {
                             // 记录遇到错误的用户
                             HashSet<long> list;
-                            if (!SendProgress.ErrorAttempts.TryGetValue(code, out list))
+                            if (!Data.ErrorAttempts.TryGetValue(code, out list))
                             {
                                 list = new HashSet<long>();
-                                SendProgress.ErrorAttempts.Add(code, list);
+                                Data.ErrorAttempts.Add(code, list);
                             }
 
                             list.Add(mid);
@@ -102,17 +105,17 @@ public class BatchMessage : BaseTask
                     }
 
                     // 立即更新进度值
-                    SendProgress.Progress = i + 1;
+                    Data.Progress = i + 1;
 
                     // 避免发送请求太快，设置延时
-                    if (!guard.Sleep(skip ? Global.Config.GetTimeout : Global.Config.MessageTimeout))
+                    if (!guard.Sleep(skip ? MessageTool.Config.GetTimeout : MessageTool.Config.MessageTimeout))
                     {
                         break;
                     }
                 }
 
                 // 保存日志
-                SaveData(SendProgress);
+                SaveData(Data);
 
                 if (i < n)
                 {
