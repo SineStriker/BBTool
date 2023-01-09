@@ -24,7 +24,7 @@ public class CollectSub : BaseTask
 
             try
             {
-                Data = LoadData<SubCommentProgress>();
+                Data = await LoadDataAsync<SubCommentProgress>();
             }
             catch (Exception e)
             {
@@ -117,7 +117,7 @@ public class CollectSub : BaseTask
         }
 
         // 保存日志
-        SaveData(Data);
+        await SaveDataAsync(Data);
 
         return !failed;
     }

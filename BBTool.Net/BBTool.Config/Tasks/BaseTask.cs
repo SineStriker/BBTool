@@ -34,6 +34,16 @@ public class BaseTask
     {
         File.WriteAllText(DataPath, JsonSerializer.Serialize(data, Sys.UnicodeJsonSerializeOption()));
     }
+
+    public async Task<T> LoadDataAsync<T>()
+    {
+        return JsonSerializer.Deserialize<T>(await File.ReadAllTextAsync(DataPath), Sys.UnicodeJsonSerializeOption())!;
+    }
+
+    public async Task SaveDataAsync<T>(T data)
+    {
+        await File.WriteAllTextAsync(DataPath, JsonSerializer.Serialize(data, Sys.UnicodeJsonSerializeOption()));
+    }
 }
 
 /// <summary>

@@ -26,7 +26,7 @@ public class GetVideo : BaseTask
 
             try
             {
-                Data = LoadData<TaskBaseInfo>();
+                Data = await LoadDataAsync<TaskBaseInfo>();
             }
             catch (Exception e)
             {
@@ -116,7 +116,7 @@ public class GetVideo : BaseTask
             }
 
             // 保存日志
-            SaveData(Data);
+            await SaveDataAsync(Data);
         }
 
         return true;

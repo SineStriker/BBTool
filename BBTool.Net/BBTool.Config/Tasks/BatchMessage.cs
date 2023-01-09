@@ -21,7 +21,7 @@ public class BatchMessage : BaseTask
 
             try
             {
-                Data = LoadData<SendProgress>();
+                Data = await LoadDataAsync<SendProgress>();
             }
             catch (Exception e)
             {
@@ -115,7 +115,7 @@ public class BatchMessage : BaseTask
                 }
 
                 // 保存日志
-                SaveData(Data);
+                await SaveDataAsync(Data);
 
                 if (i < n)
                 {

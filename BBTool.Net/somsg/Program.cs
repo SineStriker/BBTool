@@ -83,7 +83,7 @@ public static class Program
         Logger.Log("第一步");
         Logger.Log("准备...");
 
-        // 读取缓存数据
+        // 前期缓存工作
         var task1 = new CacheTask(1);
         if (!await task1.Run(initDirAction))
         {
@@ -108,7 +108,7 @@ public static class Program
         var searchResult = task2.Data;
 
         // 去重
-        var users = new List<MidNamePair>();
+        List<MidNamePair> users;
         {
             var userMap = new Dictionary<long, MidNamePair>();
             foreach (var item in searchResult.Videos)

@@ -20,7 +20,7 @@ public class CacheTask : BaseTask
 
             try
             {
-                Data = LoadData<CacheContent>();
+                Data = await LoadDataAsync<CacheContent>();
             }
             catch (Exception e)
             {
@@ -80,7 +80,7 @@ public class CacheTask : BaseTask
             }
 
             // 保存日志
-            SaveData(Data);
+            await SaveDataAsync(Data);
         }
 
         return true;

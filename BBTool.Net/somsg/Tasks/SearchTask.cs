@@ -23,7 +23,7 @@ public class SearchTask : BaseTask
 
             try
             {
-                Data = LoadData<SearchProgress>();
+                Data = await LoadDataAsync<SearchProgress>();
             }
             catch (Exception e)
             {
@@ -101,7 +101,7 @@ public class SearchTask : BaseTask
             }
         }
 
-        SaveData(Data);
+        await SaveDataAsync(Data);
 
         return !failed;
     }

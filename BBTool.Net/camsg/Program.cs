@@ -127,7 +127,7 @@ public static class Program
         var subCommands = task3.Data.SubComments;
 
         // 去重
-        var users = new List<MidNamePair>();
+        List<MidNamePair> users;
         {
             var userMap = new Dictionary<long, MidNamePair>();
             foreach (var item in rootComments)

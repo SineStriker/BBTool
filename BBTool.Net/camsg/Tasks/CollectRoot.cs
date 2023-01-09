@@ -23,7 +23,7 @@ public class CollectRoot : BaseTask
 
             try
             {
-                Data = LoadData<CommentProgress>();
+                Data = await LoadDataAsync<CommentProgress>();
             }
             catch (Exception e)
             {
@@ -80,7 +80,7 @@ public class CollectRoot : BaseTask
         }
 
         // 保存日志
-        SaveData(Data);
+        await SaveDataAsync(Data);
 
         return !failed;
     }
