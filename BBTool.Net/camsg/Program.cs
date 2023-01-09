@@ -18,7 +18,11 @@ public static class Program
 {
     public static async Task<int> Main(string[] args)
     {
+        // 添加终端编码信息
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+        
+        // 设置默认配置信息
+        MessageTool.Config = new MessageConfig();
 
         // 介绍信息
         var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!;
@@ -28,7 +32,7 @@ public static class Program
         Console.WriteLine();
 
         var rootCommand = new AppCommand();
-        rootCommand.SetRoutine(DoWorkSync);
+        rootCommand.SetRoutine(WorkRoutine);
 
         var parserBuilder = new CommandLineBuilder(rootCommand);
         parserBuilder.AddCookiePath(); // 添加 Cookie 选项
@@ -44,7 +48,7 @@ public static class Program
         return code;
     }
 
-    static async Task DoWorkSync(InvocationContext context)
+    static async Task WorkRoutine(InvocationContext context)
     {
         // 获取用户信息
         var task0 = new CheckUserTask();
@@ -82,7 +86,7 @@ public static class Program
         var commentInfo = task1.Data.CommentInfo;
 
         // 检查是否有消息内容
-        string message = MessageTool.Config.Message;
+        string message = Global.Config.Message;
         if (string.IsNullOrEmpty(message))
         {
             Logger.LogWarn("缺少消息内容");
@@ -96,7 +100,7 @@ public static class Program
 
         Logger.Log("第二步");
         Logger.Log(
-            $"获取根评论区所有用户信息，每{MessageTool.Config.GetTimeout}毫秒获取一页，每页{MessageConfig.NumPerPage}个，总共{commentInfo.Root}个...");
+            $"获取根评论区所有用户信息，每{Global.Config.GetTimeout}毫秒获取一页，每页{MessageConfig.NumPerPage}个，总共{commentInfo.Root}个...");
 
         // 获取根评论区
         var task2 = new CollectRoot();
@@ -112,7 +116,7 @@ public static class Program
 
         Logger.Log("第三步");
         Logger.Log(
-            $"获取副评论区所有用户信息，每{MessageTool.Config.GetTimeout}毫秒获取一页，每页{MessageConfig.NumPerPage}个，总共{subCount}个...");
+            $"获取副评论区所有用户信息，每{Global.Config.GetTimeout}毫秒获取一页，每页{MessageConfig.NumPerPage}个，总共{subCount}个...");
 
         // 获取副评论区
         var task3 = new CollectSub();
@@ -159,7 +163,7 @@ public static class Program
         Console.WriteLine();
 
         Logger.Log("第四步");
-        Logger.Log($"向所有用户发送消息，每{MessageTool.Config.MessageTimeout}毫秒发送一次...");
+        Logger.Log($"向所有用户发送消息，每{Global.Config.MessageTimeout}毫秒发送一次...");
         Logger.LogColor($"消息内容：{Text.ElideString(message, 10)}");
 
         // return;

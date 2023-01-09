@@ -89,7 +89,7 @@ public class GetVideo : BaseTask
             }
 
             // 保存消息内容
-            Data.SavedMessage = MessageTool.Config.Message;
+            Data.SavedMessage = Global.Config.Message;
 
             // 保存日志
             SaveData(Data);

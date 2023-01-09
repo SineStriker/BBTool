@@ -62,7 +62,7 @@ public class CollectRoot : BaseTask
                     $"{list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{Text.ElideString(first.Message.Replace("\n", " "), 10)}");
 
                 // 避免发送请求太快，设置延时
-                if (!guard.Sleep(MessageTool.Config.GetTimeout))
+                if (!guard.Sleep(Global.Config.GetTimeout))
                 {
                     failed = true;
                     break;

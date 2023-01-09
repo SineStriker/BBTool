@@ -88,7 +88,7 @@ public class CollectSub : BaseTask
                     );
 
                     // 避免发送请求太快，设置延时
-                    if (!guard.Sleep(MessageTool.Config.GetTimeout))
+                    if (!guard.Sleep(Global.Config.GetTimeout))
                     {
                         failed = true;
                         break;

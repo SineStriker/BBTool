@@ -105,7 +105,7 @@ public class BatchMessage : BaseTask
                     SendProgress.Progress = i + 1;
 
                     // 避免发送请求太快，设置延时
-                    if (!guard.Sleep(skip ? MessageTool.Config.GetTimeout : MessageTool.Config.MessageTimeout))
+                    if (!guard.Sleep(skip ? Global.Config.GetTimeout : Global.Config.MessageTimeout))
                     {
                         break;
                     }

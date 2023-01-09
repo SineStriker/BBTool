@@ -24,7 +24,7 @@ public static class MessageTool
     /// <summary>
     /// 全局配置
     /// </summary>
-    public static MessageConfig Config = new();
+    public static MessageConfig Config = null;
 
     /// <summary>
     /// 信号量

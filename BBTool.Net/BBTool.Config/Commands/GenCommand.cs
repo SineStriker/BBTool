@@ -38,12 +38,12 @@ public class GenConfigCommand : Command
     {
         var info = context.ParseResult.GetValueForOption(Output)!;
 
-        GenerateConfigFile(info);
+        await GenerateConfigFile(info);
 
         Console.WriteLine($"写入默认配置文件到\"{info.Name}\"成功");
     }
 
-    protected void GenerateConfigFile(FileInfo info)
+    protected async virtual Task GenerateConfigFile(FileInfo info)
     {
         var conf = new MessageConfig();
         conf.Message = "你好";
