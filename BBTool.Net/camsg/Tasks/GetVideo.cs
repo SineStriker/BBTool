@@ -11,36 +11,39 @@ public class GetVideo : BaseTask
 {
     public override int TaskId => 0;
 
-    public override string TaskLogDir => Global.AppLogDir;
-
-    public class TaskData
-    {
-        public VideoInfo VideoInfo { get; set; }
-
-        public CommentCount CommentInfo { get; set; }
-    }
-
-    public TaskData Data { get; set; } = new();
+    public TaskBaseInfo Data { get; set; } = new();
 
     public async Task<bool> Run(string vid)
     {
-        if (Global.RecoveryMode)
+        if (Global.RecoveryMode && DataExists)
         {
             Logger.Log("从日志中获取视频信息...");
 
             try
             {
-                Data = JsonSerializer.Deserialize<TaskData>(File.ReadAllText(DataPath),
-                    Sys.UnicodeJsonSerializeOption())!;
+                Data = LoadData<TaskBaseInfo>();
             }
             catch (Exception e)
             {
                 Logger.LogError($"读取日志失败，错误信息：{e.Message}");
                 return false;
             }
+
+            // 若本次未指定消息内容
+            if (!string.IsNullOrEmpty(Data.SavedMessage) && string.IsNullOrEmpty(Global.Config.Message))
+            {
+                Logger.Log($"由于没有指定消息内容，使用日志中保存的代替");
+                Global.Config.Message = Data.SavedMessage;
+            }
         }
         else
         {
+            if (string.IsNullOrEmpty(vid))
+            {
+                Logger.LogError($"缺少视频id");
+                return false;
+            }
+
             Logger.Log("获取视频信息...");
             if (vid.ToLower().StartsWith("av") || vid.ToLower().StartsWith("bv"))
             {
@@ -76,8 +79,11 @@ public class GetVideo : BaseTask
                 return false;
             }
 
-            // 保存任务日志
-            File.WriteAllBytes(DataPath, JsonSerializer.SerializeToUtf8Bytes(Data, Sys.UnicodeJsonSerializeOption()));
+            // 保存消息内容
+            Data.SavedMessage = Global.Config.Message;
+
+            // 保存日志
+            SaveData(Data);
         }
 
         Logger.LogDebug($"AV号：{Data.VideoInfo.Avid}");

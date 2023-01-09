@@ -2,6 +2,7 @@
 using System.CommandLine.Binding;
 using System.CommandLine.Parsing;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using BBDown.Core;
 using BBTool.Core.Entities;
 using BBTool.Core.User;
@@ -102,6 +103,16 @@ public class WorkContent
         command.SetHandler(async opt => await Routine(opt), new Binder(this, impl));
     }
 
+    private void RemoveLogDir()
+    {
+        // 递归删除日志目录
+        var dir = new DirectoryInfo(Global.AppLogDir);
+        if (dir.Exists)
+        {
+            dir.Delete(true);
+        }
+    }
+
     private async Task Routine(WorkOption opt)
     {
         // 加载 COOKIE
@@ -126,26 +137,123 @@ public class WorkContent
             Logger.LogColor($"用户名：{user.UserName}");
             Logger.LogColor($"用户id：{user.Mid}");
         }
+        Console.WriteLine();
 
-        // 检查配置信息
-        if (string.IsNullOrEmpty(Global.Config.Message))
+        // 删除旧的日志
+        if (!Global.RecoveryMode)
         {
-            Logger.LogWarn("没有消息内容");
-            return;
+            RemoveLogDir();
         }
 
-        Console.WriteLine();
+        Directory.CreateDirectory(Global.AppLogDir);
+        
+        Directory.CreateDirectory(Global.AppHistoryDir);
 
         // 开始执行任务
         Logger.Log("第一步");
+
+        // 获取视频内容
         var task1 = new GetVideo();
         if (!await task1.Run(opt.VideoId))
         {
             return;
         }
 
+        var videoInfo = task1.Data.VideoInfo;
+        var commentInfo = task1.Data.CommentInfo;
+
+        // 检查是否有消息内容
+        string message = Global.Config.Message;
+        if (string.IsNullOrEmpty(message))
+        {
+            Logger.LogWarn("缺少消息内容");
+            return;
+        }
+
         Console.WriteLine();
 
+        // 全局捕获退出信号
+        Global.InstallInterruptFilter();
+
         Logger.Log("第二步");
+        Logger.Log(
+            $"获取根评论区所有用户信息，每{Global.Config.GetTimeout}毫秒获取一页，每页{AppConfig.NumPerPage}个，总共{commentInfo.Root}个...");
+
+        // 获取根评论区
+        var task2 = new CollectRoot();
+        if (!await task2.Run(videoInfo.Avid, commentInfo.Root))
+        {
+            return;
+        }
+
+        var rootComments = task2.Data.Comments;
+        var subCount = commentInfo.Total - rootComments.Count;
+
+        Console.WriteLine();
+
+        Logger.Log("第三步");
+        Logger.Log($"获取副评论区所有用户信息，每{Global.Config.GetTimeout}毫秒获取一页，每页{AppConfig.NumPerPage}个，总共{subCount}个...");
+
+        // 获取副评论区
+        var task3 = new CollectSub();
+        if (!await task3.Run(videoInfo.Avid, rootComments))
+        {
+            return;
+        }
+
+        var subCommands = task3.Data.SubComments;
+
+        var users = new List<MidNamePair>();
+        {
+            foreach (var item in rootComments)
+            {
+                users.Add(new(item.Mid, item.UserName));
+            }
+
+            foreach (var item in subCommands)
+            {
+                foreach (var subitem in item.Value.Comments)
+                {
+                    users.Add(new(subitem.Mid, subitem.UserName));
+                }
+            }
+        }
+
+        Console.WriteLine();
+
+        Logger.Log("第四步");
+        Logger.Log($"向所有用户发送消息，每{Global.Config.MessageTimeout}毫秒发送一次...");
+        Logger.LogColor($"消息内容：{Text.ElideString(message, 10)}");
+
+        // return;
+
+        // 发送消息
+        var task4 = new BatchMessage();
+        if (!await task4.Run(user.Mid, users, message))
+        {
+            return;
+        }
+
+        // 特殊错误一览
+        // ...
+
+        Logger.Log("任务完成，删除所有日志");
+
+        RemoveLogDir();
+
+        // 保存任务历史
+        {
+            var history = new History
+            {
+                Avid = videoInfo.Avid,
+                Users = users.Select(item => item.Mid).ToList(),
+                ErrorAttempts = task4.Data.ErrorAttempts,
+            };
+
+            var filename = DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".json";
+            var path = Path.Combine(Global.AppHistoryDir, filename);
+            File.WriteAllText(path, JsonSerializer.Serialize(history, Sys.UnicodeJsonSerializeOption()));
+            Logger.Log($"保存本次任务信息到\"{filename}\"中");
+        }
     }
 }

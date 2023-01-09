@@ -1,1 +1,1 @@
-﻿dotnet publish -c release -r win-x64 -p:PublishSingleFile=true -o win-x64
+dotnet publish -c release -r win-x64 -o win-x64

@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\BBTool.Core\BBTool.Core.csproj" />
       <ProjectReference Include="..\BBTool.Core\BBTool.Core.csproj" />
     </ItemGroup>
 

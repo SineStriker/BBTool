@@ -19,7 +19,28 @@ public class GetInfo : SimpleRequest
                     Category = obj.GetProperty("tname").GetString()!,
                     PublishTime = Sys.GetDateTime(obj.GetProperty("pubdate").GetInt32()),
                 },
-            () => HttpNew.Get(ImplementUrl(vid.Substring(0, 2).ToLower(), vid), cookie)
+            () => HttpNew.Get(ImplementUrl(vid), cookie)
         );
+    }
+
+    protected override string ImplementUrl(params object?[] args)
+    {
+        if (args.Length == 0)
+        {
+            return "";
+        }
+
+        var vid = args.First()!.ToString()!;
+        if (vid.ToLower().StartsWith("av"))
+        {
+            return string.Format(ApiPattern, "a", vid.Substring(2));
+        }
+
+        if (vid.ToLower().StartsWith("bv"))
+        {
+            return string.Format(ApiPattern, "bv", vid);
+        }
+
+        return "";
     }
 }

@@ -82,7 +82,7 @@ public class HttpNew
     {
         Logger.LogDebug($"Post 表单：{JsonSerializer.Serialize(fields, Sys.UnicodeJsonSerializeOption())}");
         return await Post(url,
-            new FormUrlEncodedContent(fields.ToDictionary(pair => pair.Key, pair => pair.Value.ToString()!)),
+            new FormUrlEncodedContent(fields.ToDictionary(pair => pair.Key, pair => pair.Value.ToString())),
             cookie,
             headerItems
         );

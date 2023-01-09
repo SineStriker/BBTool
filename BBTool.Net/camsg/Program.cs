@@ -1,6 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Help;
 using System.CommandLine.Parsing;
@@ -46,6 +45,11 @@ public static class Program
 
         // 开始解析
         var parser = parserBuilder.Build();
-        return await parser.InvokeAsync(args);
+        var code = await parser.InvokeAsync(args);
+
+        // 同意主程序域退出
+        Global.AcceptExit = 1;
+
+        return code;
     }
 }

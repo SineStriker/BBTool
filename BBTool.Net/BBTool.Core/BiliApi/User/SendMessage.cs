@@ -23,7 +23,7 @@ public class SendMessage : SimpleRequest
         BlackList = 25003,
     }
 
-    public async Task<bool> Send(int senderId, int receiverId, string message, string cookie)
+    public async Task<bool> Send(long senderId, long receiverId, string message, string cookie)
     {
         string csrf = CookieUtil.GetCsrfToken(cookie);
         if (csrf == "")

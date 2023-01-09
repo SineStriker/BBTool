@@ -40,6 +40,7 @@ public class GenConfigCommand : Command
         conf.Message = "你好";
 
         // 生成默认配置信息后退出
+        // File.WriteAllText(info.FullName, JsonSerializer.Serialize(conf, AOT.Json.AppConfigCTX.Type));
         File.WriteAllText(info.FullName, JsonSerializer.Serialize(conf, Sys.UnicodeJsonSerializeOption(true)));
 
         Console.WriteLine($"写入默认配置文件到\"{info.Name}\"成功");

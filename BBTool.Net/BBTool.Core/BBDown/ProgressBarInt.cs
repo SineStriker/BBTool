@@ -7,7 +7,7 @@ using System.Threading;
  */
 namespace BBDown
 {
-    public class ProgressBar : IDisposable, IProgress<double>
+    class ProgressBarInt : IDisposable, IProgress<int>
     {
         private const int blockCount = 40;
         private readonly TimeSpan animationInterval = TimeSpan.FromSeconds(1.0 / 8);
@@ -15,13 +15,19 @@ namespace BBDown
 
         private readonly Timer timer;
 
-        private double currentProgress = 0;
         private string currentText = string.Empty;
         private bool disposed = false;
         private int animationIndex = 0;
 
-        public ProgressBar()
+        private int minimum;
+        private int maximum;
+        private int currentValue;
+
+        public ProgressBarInt(int min, int max)
         {
+            minimum = min;
+            maximum = max;
+
             timer = new Timer(TimerHandler);
 
             // A progress bar is only for temporary display in a console window.
@@ -33,11 +39,11 @@ namespace BBDown
             }
         }
 
-        public void Report(double value)
+        public void Report(int value)
         {
             // Make sure value is in [0..1] range
-            value = Math.Max(0, Math.Min(1, value));
-            Interlocked.Exchange(ref currentProgress, value);
+            value = Math.Max(minimum, Math.Min(maximum, value));
+            Interlocked.Exchange(ref currentValue, value);
         }
 
         private void TimerHandler(object? state)
@@ -46,12 +52,14 @@ namespace BBDown
             {
                 if (disposed) return;
 
+                double currentProgress = (double)(currentValue - minimum) / (maximum - minimum);
                 int progressBlockCount = (int)(currentProgress * blockCount);
-                int percent = (int)(currentProgress * 100);
-                string text = string.Format("                            [{0}{1}] {2,3}% {3}",
+                string text = string.Format("                            [{0}{1}] {2} {3}/{4}",
                     new string('#', progressBlockCount), new string('-', blockCount - progressBlockCount),
-                    percent,
-                    animation[animationIndex++ % animation.Length]);
+                    animation[animationIndex++ % animation.Length],
+                    currentValue,
+                    maximum
+                );
                 UpdateText(text);
 
                 ResetTimer();

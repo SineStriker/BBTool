@@ -25,6 +25,7 @@ public class GetSubComments : SimpleRequest
                         var info = new CommentInfo();
                         info.Id = item.GetProperty("rpid").GetInt64();
                         info.Mid = item.GetProperty("mid").GetInt64();
+                        info.UserName = item.GetProperty("member").GetProperty("uname").GetString()!;
                         info.Message = item.GetProperty("content").GetProperty("message").GetString()!;
                         info.Count = item.GetProperty("count").GetInt32();
 
