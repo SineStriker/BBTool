@@ -4,6 +4,7 @@ using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using BBDown.Core;
+using BBTool.Config;
 using BBTool.Core.Entities;
 using BBTool.Core.User;
 using BBTool.Core.LowLevel;
@@ -106,7 +107,7 @@ public class WorkContent
     private void RemoveLogDir()
     {
         // 递归删除日志目录
-        var dir = new DirectoryInfo(Global.AppLogDir);
+        var dir = new DirectoryInfo(MessageTool.AppLogDir);
         if (dir.Exists)
         {
             dir.Delete(true);
@@ -116,10 +117,10 @@ public class WorkContent
     private async Task Routine(WorkOption opt)
     {
         // 加载 COOKIE
-        if (File.Exists(Global.CookiePath))
+        if (File.Exists(MessageTool.CookiePath))
         {
             Logger.Log("加载本地cookie...");
-            Global.Cookie = File.ReadAllText(Global.CookiePath);
+            MessageTool.Cookie = File.ReadAllText(MessageTool.CookiePath);
         }
 
         // 检测用户是否登录
@@ -127,7 +128,7 @@ public class WorkContent
         UserInfo user;
         {
             var api = new GetInfo();
-            user = await api.Send(Global.Cookie);
+            user = await api.Send(MessageTool.Cookie);
             if (UserInfo.IsNullOrOff(user))
             {
                 Logger.LogWarn("你尚未登录B站账号, 无法进行后续操作");
@@ -140,14 +141,14 @@ public class WorkContent
         Console.WriteLine();
 
         // 删除旧的日志
-        if (!Global.RecoveryMode)
+        if (!MessageTool.RecoveryMode)
         {
             RemoveLogDir();
         }
 
-        Directory.CreateDirectory(Global.AppLogDir);
+        Directory.CreateDirectory(MessageTool.AppLogDir);
         
-        Directory.CreateDirectory(Global.AppHistoryDir);
+        Directory.CreateDirectory(MessageTool.AppHistoryDir);
 
         // 开始执行任务
         Logger.Log("第一步");
@@ -173,7 +174,7 @@ public class WorkContent
         Console.WriteLine();
 
         // 全局捕获退出信号
-        Global.InstallInterruptFilter();
+        MessageTool.InstallInterruptFilter();
 
         Logger.Log("第二步");
         Logger.Log(
@@ -251,7 +252,7 @@ public class WorkContent
             };
 
             var filename = DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".json";
-            var path = Path.Combine(Global.AppHistoryDir, filename);
+            var path = Path.Combine(MessageTool.AppHistoryDir, filename);
             File.WriteAllText(path, JsonSerializer.Serialize(history, Sys.UnicodeJsonSerializeOption()));
             Logger.Log($"保存本次任务信息到\"{filename}\"中");
         }

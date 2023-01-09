@@ -5,9 +5,9 @@ using System.CommandLine.Help;
 using System.CommandLine.Parsing;
 using BBTool.Config;
 using BBTool.Config.Commands;
-using Camsg.Commands;
+using Somsg.Commands;
 
-namespace Camsg;
+namespace Somsg;
 
 public static class Program
 {

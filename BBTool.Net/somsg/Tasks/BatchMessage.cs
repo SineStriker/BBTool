@@ -2,7 +2,7 @@
 using BBTool.Config;
 using BBTool.Core.User;
 
-namespace Camsg.Tasks;
+namespace Somsg.Tasks;
 
 public class BatchMessage : BaseTask
 {

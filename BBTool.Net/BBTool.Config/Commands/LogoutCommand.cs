@@ -1,8 +1,9 @@
 ﻿using System.CommandLine;
 using BBDown.Core;
+using BBTool.Config;
 using BBTool.Core.User;
 
-namespace Camsg.Commands;
+namespace BBTool.Config.Commands;
 
 public class LogoutCommand : Command
 {
@@ -13,7 +14,7 @@ public class LogoutCommand : Command
 
     private async Task Routine()
     {
-        var info = new FileInfo(Global.CookiePath);
+        var info = new FileInfo(MessageTool.CookiePath);
         if (!info.Exists)
         {
             Logger.LogWarn("没有找到本地Cookie");

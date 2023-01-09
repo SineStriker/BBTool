@@ -6,7 +6,7 @@ using BBTool.Core.User;
 using BBTool.Core.LowLevel;
 using GetInfo = BBTool.Core.Video.GetInfo;
 
-namespace Camsg.Tasks;
+namespace Somsg.Tasks;
 
 public class GetVideo : BaseTask
 {

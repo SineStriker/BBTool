@@ -1,7 +1,7 @@
 ﻿using System.CommandLine;
 using BBTool.Config.Commands;
 
-namespace Camsg.Commands;
+namespace Somsg.Commands;
 
 public class AppCommand : RootCommand
 {

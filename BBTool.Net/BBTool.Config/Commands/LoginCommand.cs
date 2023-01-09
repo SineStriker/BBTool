@@ -1,8 +1,9 @@
 ﻿using System.CommandLine;
 using BBDown.Core;
+using BBTool.Config;
 using BBTool.Core.User;
 
-namespace Camsg.Commands;
+namespace BBTool.Config.Commands;
 
 public class LoginCommand : Command
 {
@@ -23,6 +24,6 @@ public class LoginCommand : Command
 
         // 写入Cookie
         Logger.Log($"保存本地cookie");
-        File.WriteAllText(Global.CookiePath, cookie);
+        File.WriteAllText(MessageTool.CookiePath, cookie);
     }
 }

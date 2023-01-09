@@ -1,7 +1,7 @@
 ﻿using System.CommandLine;
 using BBTool.Config;
 
-namespace Camsg.Commands;
+namespace Somsg.Commands;
 
 public class RecoverCommand : Command
 {

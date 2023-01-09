@@ -1,14 +1,15 @@
 ﻿using System.Text.Json;
 using BBDown.Core;
+using BBTool.Config;
 using BBTool.Core.LowLevel;
 
-namespace Camsg.Tasks;
+namespace BBTool.Config;
 
 public class BaseTask
 {
     public virtual int TaskId { get; }
 
-    public virtual string TaskLogDir => Global.AppLogDir;
+    public virtual string TaskLogDir => MessageTool.AppLogDir;
 
     public virtual string DataPath => Path.Combine(TaskLogDir, $"task_{TaskId}.json");
 
@@ -40,7 +41,7 @@ public class BaseTask
                 for (int i = 0; i < num; ++i)
                 {
                     // 判断是否中断
-                    if (Global.Interrupt != 0)
+                    if (MessageTool.Interrupt != 0)
                     {
                         interrupt = true;
                         return false;

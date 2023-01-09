@@ -4,7 +4,7 @@ using BBTool.Core.Entities;
 using BBTool.Core.LowLevel;
 using BBTool.Core.Video;
 
-namespace Camsg.Tasks;
+namespace Somsg.Tasks;
 
 public class CollectRoot : BaseTask
 {

@@ -1,8 +1,9 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
+using BBTool.Config;
 
-namespace Camsg.Commands;
+namespace BBTool.Config.Commands;
 
 public class GlobalContent
 {
@@ -16,7 +17,7 @@ public class GlobalContent
         {
             if (context.ParseResult.HasOption(Debug))
             {
-                Global.DebugMode = true;
+                MessageTool.DebugMode = true;
                 BBTool.Core.Global.EnableDebug = true;
             }
 

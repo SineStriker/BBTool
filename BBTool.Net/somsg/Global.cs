@@ -1,6 +1,6 @@
 ﻿using BBTool.Config;
 
-namespace Camsg;
+namespace Somsg;
 
 public static class Global
 {

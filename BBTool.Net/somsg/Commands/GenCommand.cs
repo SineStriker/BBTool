@@ -6,7 +6,7 @@ using BBDown.Core;
 using BBTool.Config;
 using BBTool.Core.LowLevel;
 
-namespace Camsg.Commands;
+namespace Somsg.Commands;
 
 public class GenConfigCommand : Command
 {
