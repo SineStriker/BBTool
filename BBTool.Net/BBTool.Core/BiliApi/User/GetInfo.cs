@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
-using BBTool.Core.Entities;
+﻿using BBTool.Core.BiliApi.Entities;
+using BBTool.Core.BiliApi.Interfaces;
 using BBTool.Core.LowLevel;
 
-namespace BBTool.Core.User;
+namespace BBTool.Core.BiliApi.User;
 
 public class GetInfo : SimpleRequest
 {
@@ -15,7 +15,7 @@ public class GetInfo : SimpleRequest
                 {
                     IsLogin = obj.GetProperty("isLogin").GetBoolean(),
                     Mid = obj.GetProperty("mid").GetInt64(),
-                    UserName = obj.GetProperty("uname").GetString(),
+                    UserName = obj.GetProperty("uname").GetString()!,
                 },
             () => HttpNew.Get(ImplementUrl(), cookie)
         );

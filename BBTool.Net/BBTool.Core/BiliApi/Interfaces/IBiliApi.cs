@@ -1,4 +1,4 @@
-﻿namespace BBTool.Core;
+﻿namespace BBTool.Core.BiliApi.Interfaces;
 
 public interface IBiliApi
 {

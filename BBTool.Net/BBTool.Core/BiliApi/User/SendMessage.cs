@@ -1,11 +1,8 @@
 ﻿using System.ComponentModel;
-using System.Text;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-using BBTool.Core.BiliApi;
+using BBTool.Core.BiliApi.Interfaces;
 using BBTool.Core.LowLevel;
 
-namespace BBTool.Core.User;
+namespace BBTool.Core.BiliApi.User;
 
 public class SendMessage : SimpleRequest
 {

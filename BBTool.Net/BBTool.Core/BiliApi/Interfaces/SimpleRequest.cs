@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using BBDown.Core;
 
-namespace BBTool.Core;
+namespace BBTool.Core.BiliApi.Interfaces;
 
 public abstract class SimpleRequest : IBiliApi
 {

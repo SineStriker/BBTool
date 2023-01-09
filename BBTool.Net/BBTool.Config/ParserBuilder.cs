@@ -5,9 +5,9 @@ using BBTool.Config.Commands;
 
 namespace BBTool.Config;
 
-public class MyParserBuilder : CommandLineBuilder
+public class ParserBuilder : CommandLineBuilder
 {
-    public MyParserBuilder(Command command, string[] args, Action<CommandLineBuilder> doFirst = null) : base(command)
+    public ParserBuilder(RootCommand command, string[] args, Action<CommandLineBuilder> doFirst = null) : base(command)
     {
         if (doFirst != null)
         {
@@ -15,7 +15,7 @@ public class MyParserBuilder : CommandLineBuilder
         }
 
         // 全局选项
-        var globalContent = new GlobalContent();
+        var globalContent = new PreCommandImpl();
         globalContent.Setup(this);
 
         // 没有命令行参数直接输出帮助信息

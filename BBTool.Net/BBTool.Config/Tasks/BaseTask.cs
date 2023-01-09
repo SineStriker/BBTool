@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using BBDown;
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Core.LowLevel;
@@ -7,13 +8,17 @@ namespace BBTool.Config;
 
 public class BaseTask
 {
-    public virtual int TaskId { get; }
+    public virtual int TaskId { get; } = -1;
 
     public virtual string TaskLogDir => MessageTool.AppLogDir;
 
     public virtual string DataPath => Path.Combine(TaskLogDir, $"task_{TaskId}.json");
 
     public bool DataExists => File.Exists(DataPath);
+
+    public BaseTask()
+    {
+    }
 
     public T LoadData<T>()
     {
@@ -24,15 +29,51 @@ public class BaseTask
     {
         File.WriteAllText(DataPath, JsonSerializer.Serialize(data, Sys.UnicodeJsonSerializeOption()));
     }
+}
+
+/// <summary>
+/// 其监视的范围可捕获 Ctrl +C，不影响全局
+/// </summary>
+public class LocalTaskGuard : IDisposable
+{
+    public LocalTaskGuard(Action action = null)
+    {
+        ActionAfterDispose = action;
+
+        Console.CancelKeyPress += InterruptHandler;
+    }
+
+    public void Dispose()
+    {
+        Console.CancelKeyPress -= InterruptHandler;
+        if (ActionAfterDispose != null)
+        {
+            ActionAfterDispose.Invoke();
+        }
+    }
+
+    protected Action ActionAfterDispose { get; }
+
+    /// <summary>
+    /// 不管有没有全局中断都可继续
+    /// </summary>
+    protected volatile int LocalInterrupt = 0;
+
+    protected void InterruptHandler(object? sender, ConsoleCancelEventArgs e)
+    {
+        e.Cancel = true; // true: 不导致退出；false: 会导致退出
+        LocalInterrupt = 1;
+    }
 
     /// <summary>
     /// 睡眠，直到超时或中断
     /// </summary>
     /// <param name="timeout">毫秒数</param>
     /// <returns>超时返回true，中断返回false</returns>
-    public bool Sleep(int timeout)
+    public bool Sleep(int timeout, bool showBar = true)
     {
-        var bar = new BBDown.ProgressBar();
+        ProgressBar bar = showBar ? new ProgressBar() : null;
+
         var interrupt = false;
         var task = Task.Run(() =>
             {
@@ -41,13 +82,16 @@ public class BaseTask
                 for (int i = 0; i < num; ++i)
                 {
                     // 判断是否中断
-                    if (MessageTool.Interrupt != 0)
+                    if (LocalInterrupt != 0)
                     {
                         interrupt = true;
                         return false;
                     }
 
-                    bar.Report((double)i / num);
+                    if (bar != null)
+                    {
+                        bar.Report((double)i / num);
+                    }
 
                     Thread.Sleep(100);
                 }
@@ -57,7 +101,11 @@ public class BaseTask
         );
 
         task.Wait();
-        bar.Dispose();
+
+        if (bar != null)
+        {
+            bar.Dispose();
+        }
 
         if (interrupt)
         {

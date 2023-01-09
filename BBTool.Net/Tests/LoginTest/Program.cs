@@ -1,8 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using BBDown.Core;
+using BBTool.Config;
 using BBTool.Core;
-using BBTool.Core.User;
+using BBTool.Core.BiliApi.Login;
 
 public static class Program
 {
@@ -20,11 +21,10 @@ public static class Program
         {
             Logger.Log("测试登录");
             {
-                var api = new Login();
-                cookie = api.Send().Result;
+                var task = new LoginTask();
+                cookie = task.Run().Result;
                 if (string.IsNullOrEmpty(cookie))
                 {
-                    Logger.LogError(api.ErrorMessage);
                     return 0;
                 }
             }

@@ -1,8 +1,9 @@
 ﻿using System.Text.Json;
-using BBTool.Core.Entities;
+using BBTool.Core.BiliApi.Entities;
+using BBTool.Core.BiliApi.Interfaces;
 using BBTool.Core.LowLevel;
 
-namespace BBTool.Core.Video;
+namespace BBTool.Core.BiliApi.Video;
 
 public class GetRootComments : SimpleRequest
 {

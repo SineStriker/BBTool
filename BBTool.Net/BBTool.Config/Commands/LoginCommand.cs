@@ -1,7 +1,5 @@
 ﻿using System.CommandLine;
 using BBDown.Core;
-using BBTool.Config;
-using BBTool.Core.User;
 
 namespace BBTool.Config.Commands;
 
@@ -14,11 +12,11 @@ public class LoginCommand : Command
 
     private async Task Routine()
     {
-        var api = new Login();
-        var cookie = await api.Send();
+        var task = new LoginTask();
+        var cookie = await task.Run();
         if (string.IsNullOrEmpty(cookie))
         {
-            Logger.LogError(api.ErrorMessage);
+            // 登录失败
             return;
         }
 

@@ -1,7 +1,6 @@
 ﻿using System.CommandLine;
 using BBDown.Core;
-using BBTool.Config;
-using BBTool.Core.User;
+using BBTool.Core.BiliApi.Login;
 
 namespace BBTool.Config.Commands;
 

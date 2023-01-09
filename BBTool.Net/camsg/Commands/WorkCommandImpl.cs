@@ -1,18 +1,16 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Binding;
+using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using BBDown.Core;
 using BBTool.Config;
-using BBTool.Core.Entities;
-using BBTool.Core.User;
+using BBTool.Config.Commands;
 using BBTool.Core.LowLevel;
 using Camsg.Tasks;
 
 namespace Camsg.Commands;
 
-public class WorkContent
+public class WorkCommandImpl
 {
     // 选项
     public Option<FileInfo> Config = new(new[] { "-c", "--config" }, "从配置文件获取参数")
@@ -32,76 +30,53 @@ public class WorkContent
         ArgumentHelpName = "timeout",
     };
 
-    public class WorkOption
-    {
-        public bool UseConfigFile = false;
+    // 属性
+    public bool UseConfigFile { get; set; } = false;
 
-        public string VideoId = "";
-    }
+    public string VideoId { get; set; } = "";
 
-    // 解析器
-    public class Binder : BinderBase<WorkOption>
-    {
-        public Binder(WorkContent cmd, Action<WorkOption, BindingContext> impl) => (_cmd, _impl) = (cmd, impl);
-
-        protected override WorkOption GetBoundValue(BindingContext bindingContext)
-        {
-            var opt = new WorkOption();
-
-            var res = bindingContext.ParseResult;
-
-            if (res.HasOption(_cmd.Config))
-            {
-                var info = res.GetValueForOption(_cmd.Config);
-
-                Global.Config = JsonSerializer.Deserialize<AppConfig>(
-                    File.ReadAllBytes(info.FullName),
-                    Sys.UnicodeJsonSerializeOption()
-                );
-                if (Global.Config == null)
-                {
-                    throw new FormatException($"{info.FullName} 格式不正确");
-                }
-
-                opt.UseConfigFile = true;
-            }
-
-            if (res.HasOption(_cmd.Message) && !opt.UseConfigFile)
-            {
-                Global.Config.Message = res.GetValueForOption(_cmd.Message);
-            }
-
-            if (res.HasOption(_cmd.T1) && !opt.UseConfigFile)
-            {
-                Global.Config.GetTimeout = res.GetValueForOption(_cmd.T1);
-            }
-
-            if (res.HasOption(_cmd.T2) && !opt.UseConfigFile)
-            {
-                Global.Config.MessageTimeout = res.GetValueForOption(_cmd.T2);
-            }
-
-            if (_impl != null)
-            {
-                _impl.Invoke(opt, bindingContext);
-            }
-
-            return opt;
-        }
-
-        protected WorkContent _cmd;
-
-        protected Action<WorkOption, BindingContext> _impl;
-    }
-
-    public void Setup(Command command, Action<WorkOption, BindingContext> impl)
+    public void Setup(Command command)
     {
         command.Add(Config);
         command.Add(Message);
         command.Add(T1);
         command.Add(T2);
+    }
 
-        command.SetHandler(async opt => await Routine(opt), new Binder(this, impl));
+    public void Parse(InvocationContext context)
+    {
+        var res = context.ParseResult;
+
+        if (res.HasOption(Config))
+        {
+            var info = res.GetValueForOption(Config);
+
+            Global.Config = JsonSerializer.Deserialize<AppConfig>(
+                File.ReadAllBytes(info.FullName),
+                Sys.UnicodeJsonSerializeOption()
+            );
+            if (Global.Config == null)
+            {
+                throw new FormatException($"{info.FullName} 格式不正确");
+            }
+
+            UseConfigFile = true;
+        }
+
+        if (res.HasOption(Message) && !UseConfigFile)
+        {
+            Global.Config.Message = res.GetValueForOption(Message)!;
+        }
+
+        if (res.HasOption(T1) && !UseConfigFile)
+        {
+            Global.Config.GetTimeout = res.GetValueForOption(T1);
+        }
+
+        if (res.HasOption(T2) && !UseConfigFile)
+        {
+            Global.Config.MessageTimeout = res.GetValueForOption(T2);
+        }
     }
 
     private void RemoveLogDir()
@@ -114,30 +89,16 @@ public class WorkContent
         }
     }
 
-    private async Task Routine(WorkOption opt)
+    public async Task Routine(InvocationContext context)
     {
-        // 加载 COOKIE
-        if (File.Exists(MessageTool.CookiePath))
+        var user = await LogStateCommand.LoadCookieAndGetUser();
+        if (user == null)
         {
-            Logger.Log("加载本地cookie...");
-            MessageTool.Cookie = File.ReadAllText(MessageTool.CookiePath);
+            return;
         }
 
-        // 检测用户是否登录
-        Logger.Log("获取用户信息...");
-        UserInfo user;
-        {
-            var api = new GetInfo();
-            user = await api.Send(MessageTool.Cookie);
-            if (UserInfo.IsNullOrOff(user))
-            {
-                Logger.LogWarn("你尚未登录B站账号, 无法进行后续操作");
-                return;
-            }
-
-            Logger.LogColor($"用户名：{user.UserName}");
-            Logger.LogColor($"用户id：{user.Mid}");
-        }
+        Logger.LogColor($"用户名：{user.UserName}");
+        Logger.LogColor($"用户id：{user.Mid}");
         Console.WriteLine();
 
         // 删除旧的日志
@@ -147,7 +108,7 @@ public class WorkContent
         }
 
         Directory.CreateDirectory(MessageTool.AppLogDir);
-        
+
         Directory.CreateDirectory(MessageTool.AppHistoryDir);
 
         // 开始执行任务
@@ -155,7 +116,7 @@ public class WorkContent
 
         // 获取视频内容
         var task1 = new GetVideo();
-        if (!await task1.Run(opt.VideoId))
+        if (!await task1.Run(VideoId))
         {
             return;
         }
@@ -174,7 +135,7 @@ public class WorkContent
         Console.WriteLine();
 
         // 全局捕获退出信号
-        MessageTool.InstallInterruptFilter();
+        // MessageTool.InstallInterruptFilter();
 
         Logger.Log("第二步");
         Logger.Log(
@@ -206,18 +167,35 @@ public class WorkContent
 
         var users = new List<MidNamePair>();
         {
+            var userMap = new Dictionary<long, MidNamePair>();
             foreach (var item in rootComments)
             {
-                users.Add(new(item.Mid, item.UserName));
+                if (!userMap.ContainsKey(item.Mid))
+                {
+                    userMap.Add(item.Mid, new(item.Mid, item.UserName));
+                }
+                else
+                {
+                    Logger.LogDebug($"跳过重复用户：{item.Mid}");
+                }
             }
 
             foreach (var item in subCommands)
             {
                 foreach (var subitem in item.Value.Comments)
                 {
-                    users.Add(new(subitem.Mid, subitem.UserName));
+                    if (!userMap.ContainsKey(subitem.Mid))
+                    {
+                        userMap.Add(subitem.Mid, new(subitem.Mid, subitem.UserName));
+                    }
+                    else
+                    {
+                        Logger.LogDebug($"跳过重复用户：{subitem.Mid}");
+                    }
                 }
             }
+
+            users = userMap.Values.ToList();
         }
 
         Console.WriteLine();

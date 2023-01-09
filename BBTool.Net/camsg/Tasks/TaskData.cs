@@ -1,4 +1,4 @@
-﻿using BBTool.Core.Entities;
+﻿using BBTool.Core.BiliApi.Entities;
 
 namespace Camsg.Tasks;
 
@@ -52,6 +52,6 @@ public class History
     public long Avid { get; set; } = 0;
 
     public List<long> Users { get; set; } = new();
-    
+
     public Dictionary<int, HashSet<long>> ErrorAttempts { get; set; } = new();
 }

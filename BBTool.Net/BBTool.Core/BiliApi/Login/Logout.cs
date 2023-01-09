@@ -1,7 +1,7 @@
-﻿using BBTool.Core.BiliApi;
+﻿using BBTool.Core.BiliApi.Interfaces;
 using BBTool.Core.LowLevel;
 
-namespace BBTool.Core.User;
+namespace BBTool.Core.BiliApi.Login;
 
 public class Logout : SimpleRequest
 {

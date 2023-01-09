@@ -6,7 +6,7 @@ public class AppConfig
 
     public static int DefaultMessageTimeout = 5000;
 
-    public static int NumPerPage = 20;
+    public static int NumPerPage = 20; // 每次获取一页评论数
 
     /// <summary>
     /// 发送普通请求的时间间隔

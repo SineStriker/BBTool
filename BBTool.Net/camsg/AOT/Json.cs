@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using BBTool.Core.Entities;
 using Camsg.Tasks;
 
 namespace Camsg.AOT;

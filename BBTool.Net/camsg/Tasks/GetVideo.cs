@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 using BBDown.Core;
 using BBTool.Config;
-using BBTool.Core.Entities;
-using BBTool.Core.User;
-using BBTool.Core.LowLevel;
-using GetInfo = BBTool.Core.Video.GetInfo;
+using BBTool.Core.BiliApi.Video;
+
+using GetUserInfo = BBTool.Core.BiliApi.User.GetInfo;
+using GetVideoInfo = BBTool.Core.BiliApi.Video.GetInfo;
 
 namespace Camsg.Tasks;
 
@@ -26,7 +26,7 @@ public class GetVideo : BaseTask
             }
             catch (Exception e)
             {
-                Logger.LogError($"读取日志失败，错误信息：{e.Message}");
+                Logger.LogError($"读取日志失败：{e.Message}");
                 return false;
             }
 
@@ -50,11 +50,11 @@ public class GetVideo : BaseTask
             {
                 // 获取视频信息
                 {
-                    var api = new GetInfo();
+                    var api = new GetVideoInfo();
                     var info = await api.Send(vid, MessageTool.Cookie);
                     if (info == null)
                     {
-                        Logger.LogError("获取视频信息失败");
+                        Logger.LogError($"获取视频信息失败：{api.ErrorMessage}");
                         return false;
                     }
 
@@ -67,7 +67,7 @@ public class GetVideo : BaseTask
                     var info = await api.Send(Data.VideoInfo.Avid, MessageTool.Cookie);
                     if (info == null)
                     {
-                        Logger.LogError("获取评论数失败");
+                        Logger.LogError($"获取评论数失败：{api.ErrorMessage}");
                         return false;
                     }
 
@@ -89,7 +89,7 @@ public class GetVideo : BaseTask
 
         Logger.LogDebug($"AV号：{Data.VideoInfo.Avid}");
 
-        Logger.LogColor($"作者：{Data.VideoInfo.Uploader}");
+        Logger.LogColor($"作者：{Data.VideoInfo.UserName}");
         Logger.LogColor($"发布日期：{Data.VideoInfo.PublishTime}");
         Logger.LogColor($"标题：{Data.VideoInfo.Title}");
         Logger.LogColor($"分区：{Data.VideoInfo.Category}");

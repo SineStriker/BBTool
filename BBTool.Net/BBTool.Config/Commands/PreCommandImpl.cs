@@ -5,7 +5,7 @@ using BBTool.Config;
 
 namespace BBTool.Config.Commands;
 
-public class GlobalContent
+public class PreCommandImpl
 {
     public Option<bool> Debug = new("--debug", "调试模式");
 
@@ -18,7 +18,7 @@ public class GlobalContent
             if (context.ParseResult.HasOption(Debug))
             {
                 MessageTool.DebugMode = true;
-                BBTool.Core.Global.EnableDebug = true;
+                Core.Global.EnableDebug = true;
             }
 
             await next(context);

@@ -1,8 +1,9 @@
 ﻿using System.Text.Json;
-using BBTool.Core.Entities;
+using BBTool.Core.BiliApi.Entities;
+using BBTool.Core.BiliApi.Interfaces;
 using BBTool.Core.LowLevel;
 
-namespace BBTool.Core.Video;
+namespace BBTool.Core.BiliApi.Video;
 
 public class GetInfo : SimpleRequest
 {
@@ -11,14 +12,36 @@ public class GetInfo : SimpleRequest
     public async Task<VideoInfo> Send(string vid, string cookie = "")
     {
         return await GetData(obj =>
-                new VideoInfo
+            {
+                var owner = obj.GetProperty("owner");
+                var staffList = new List<StaffInfo>();
+                JsonElement staff;
+
+                if (owner.TryGetProperty("staff", out staff))
+                {
+                    // 如果存在多个成员
+                    foreach (var item in staff.EnumerateArray())
+                    {
+                        staffList.Add(new StaffInfo
+                        {
+                            Title = item.GetProperty("title").GetString()!,
+                            Mid = item.GetProperty("mid").GetInt64(),
+                            UserName = item.GetProperty("name").GetString()!,
+                        });
+                    }
+                }
+
+                return new VideoInfo
                 {
                     Avid = obj.GetProperty("aid").GetInt64(),
-                    Uploader = obj.GetProperty("owner").GetProperty("name").GetString()!,
+                    Mid = owner.GetProperty("mid").GetInt64(),
+                    UserName = owner.GetProperty("name").GetString()!,
                     Title = obj.GetProperty("title").GetString()!,
                     Category = obj.GetProperty("tname").GetString()!,
                     PublishTime = Sys.GetDateTime(obj.GetProperty("pubdate").GetInt32()),
-                },
+                    Staffs = staffList,
+                };
+            },
             () => HttpNew.Get(ImplementUrl(vid), cookie)
         );
     }

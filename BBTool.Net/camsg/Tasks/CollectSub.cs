@@ -1,8 +1,8 @@
 ﻿using BBDown.Core;
 using BBTool.Config;
-using BBTool.Core.Entities;
+using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.LowLevel;
-using BBTool.Core.Video;
+using BBTool.Core.BiliApi.Video;
 
 namespace Camsg.Tasks;
 
@@ -36,77 +36,80 @@ public class CollectSub : BaseTask
         }
 
         bool failed = false;
-        int idx = 0;
-        int sum = rootComments.Count;
-        foreach (var item in rootComments)
+        using (var guard = new LocalTaskGuard())
         {
-            idx++;
-
-            // 如果没有评论
-            if (item.Count == 0)
+            int idx = 0;
+            int sum = rootComments.Count;
+            foreach (var item in rootComments)
             {
-                continue;
-            }
+                idx++;
 
-            // 如果有评论
-            var total = item.Count;
-
-            CommentProgress commentList;
-            if (!Data.SubComments.TryGetValue(item.Id, out commentList))
-            {
-                commentList = new CommentProgress();
-                Data.SubComments.Add(item.Id, commentList);
-            }
-
-            // 如果已经获取完了
-            if (commentList.Finished)
-            {
-                continue;
-            }
-
-            var list = commentList.Comments;
-            while (list.Count < total)
-            {
-                var api = new GetSubComments();
-                var page = (int)((double)list.Count / AppConfig.NumPerPage) + 1;
-                var comments = await api.Send(avid, item.Id, AppConfig.NumPerPage, page);
-                if (comments == null || comments.Count == 0)
+                // 如果没有评论
+                if (item.Count == 0)
                 {
-                    Logger.LogError($"获取失败：{api.ErrorMessage}");
-                    failed = true;
-                    break;
+                    continue;
                 }
 
-                list.AddRange(comments);
+                // 如果有评论
+                var total = item.Count;
 
-                var first = comments.First();
-                Logger.Log(
-                    $"{idx}/{sum} {list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{Text.ElideString(first.Message.Replace("\n", " "), 10)}"
-                );
-
-                // 避免发送请求太快，设置延时
-                if (!Sleep(Global.Config.GetTimeout))
+                CommentProgress commentList;
+                if (!Data.SubComments.TryGetValue(item.Id, out commentList))
                 {
-                    failed = true;
-                    break;
+                    commentList = new CommentProgress();
+                    Data.SubComments.Add(item.Id, commentList);
                 }
 
-                if (comments.Count < AppConfig.NumPerPage)
+                // 如果已经获取完了
+                if (commentList.Finished)
                 {
-                    commentList.Finished = true;
+                    continue;
+                }
+
+                var list = commentList.Comments;
+                while (list.Count < total)
+                {
+                    var api = new GetSubComments();
+                    var page = (int)((double)list.Count / AppConfig.NumPerPage) + 1;
+                    var comments = await api.Send(avid, item.Id, AppConfig.NumPerPage, page);
+                    if (comments == null || comments.Count == 0)
+                    {
+                        Logger.LogError($"获取失败：{api.ErrorMessage}");
+                        failed = true;
+                        break;
+                    }
+
+                    list.AddRange(comments);
+
+                    var first = comments.First();
+                    Logger.Log(
+                        $"{idx}/{sum} {list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{Text.ElideString(first.Message.Replace("\n", " "), 10)}"
+                    );
+
+                    // 避免发送请求太快，设置延时
+                    if (!guard.Sleep(Global.Config.GetTimeout))
+                    {
+                        failed = true;
+                        break;
+                    }
+
+                    if (comments.Count < AppConfig.NumPerPage)
+                    {
+                        commentList.Finished = true;
+                        break;
+                    }
+                }
+
+                if (failed)
+                {
                     break;
                 }
             }
 
-            if (failed)
+            if (!failed)
             {
-                break;
+                Data.Finished = true;
             }
-        }
-
-        if (!failed)
-        {
-            Data.Finished = true;
         }
 
         // 保存日志

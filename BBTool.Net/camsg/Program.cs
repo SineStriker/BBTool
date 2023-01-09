@@ -13,6 +13,8 @@ public static class Program
 {
     public static async Task<int> Main(string[] args)
     {
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+        
         // 介绍信息
         var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!;
         var intro = $"Comment Area Message Tool of Bilibili, version {ver.Major}.{ver.Minor}.{ver.Build}.";
@@ -21,7 +23,7 @@ public static class Program
         Console.WriteLine();
 
         var rootCommand = new AppCommand();
-        var parserBuilder = new MyParserBuilder(rootCommand, args);
+        var parserBuilder = new ParserBuilder(rootCommand, args);
 
         // 开始解析
         var parser = parserBuilder.Build();

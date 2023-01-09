@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace BBTool.Core.Entities;
+namespace BBTool.Core.BiliApi.Entities;
 
 public class UserInfo
 {

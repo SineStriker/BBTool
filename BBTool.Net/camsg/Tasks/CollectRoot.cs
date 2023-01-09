@@ -1,8 +1,7 @@
 ﻿using BBDown.Core;
 using BBTool.Config;
-using BBTool.Core.Entities;
 using BBTool.Core.LowLevel;
-using BBTool.Core.Video;
+using BBTool.Core.BiliApi.Video;
 
 namespace Camsg.Tasks;
 
@@ -39,37 +38,40 @@ public class CollectRoot : BaseTask
             Data.Total = total;
         }
 
-        var list = Data.Comments;
         bool failed = false;
-        while (list.Count < total)
+        using (var guard = new LocalTaskGuard())
         {
-            var api = new GetRootComments();
-            var page = (int)((double)list.Count / AppConfig.NumPerPage) + 1;
-            var comments = await api.Send(avid, AppConfig.NumPerPage, page);
-            if (comments == null || comments.Count == 0)
+            var list = Data.Comments;
+            while (list.Count < total)
             {
-                Logger.LogError($"获取失败：{api.ErrorMessage}");
-                failed = true;
-                break;
-            }
+                var api = new GetRootComments();
+                var page = (int)((double)list.Count / AppConfig.NumPerPage) + 1;
+                var comments = await api.Send(avid, AppConfig.NumPerPage, page);
+                if (comments == null || comments.Count == 0)
+                {
+                    Logger.LogError($"获取失败：{api.ErrorMessage}");
+                    failed = true;
+                    break;
+                }
 
-            list.AddRange(comments);
+                list.AddRange(comments);
 
-            var first = comments.First();
-            Logger.Log(
-                $"{list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{Text.ElideString(first.Message.Replace("\n", " "), 10)}");
+                var first = comments.First();
+                Logger.Log(
+                    $"{list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{Text.ElideString(first.Message.Replace("\n", " "), 10)}");
 
-            // 避免发送请求太快，设置延时
-            if (!Sleep(Global.Config.GetTimeout))
-            {
-                failed = true;
-                break;
-            }
+                // 避免发送请求太快，设置延时
+                if (!guard.Sleep(Global.Config.GetTimeout))
+                {
+                    failed = true;
+                    break;
+                }
 
-            if (comments.Count < AppConfig.NumPerPage)
-            {
-                Data.Finished = true;
-                break;
+                if (comments.Count < AppConfig.NumPerPage)
+                {
+                    Data.Finished = true;
+                    break;
+                }
             }
         }
 
