@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using BBTool.Config.Commands;
+using BBTool.Config.Commands.Affixes;
 
 namespace Camsg.Commands;
 
@@ -11,7 +12,7 @@ public class AppCommand : RootCommand
 
     // 命令
     public LoginCommand Login = new();
-    
+
     public LogoutCommand Logout = new();
 
     public LogStateCommand LogState = new();
@@ -21,7 +22,10 @@ public class AppCommand : RootCommand
     public RecoverCommand Recover = new();
 
     // 复用选项
-    private WorkCommandImpl _impl = new();
+    public MessageAffix Message;
+
+    // 控制流转移对象
+    private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;
 
     public AppCommand() : base("对 Bilibili 指定视频的评论区中的所有用户发送消息")
     {
@@ -32,18 +36,27 @@ public class AppCommand : RootCommand
         Add(LogState);
         Add(GenConfig);
         Add(Recover);
-        
-        _impl.Setup(this);
+
+        Message = new MessageAffix(this);
+        Message.Setup();
 
         this.SetHandler(Routine);
     }
 
+    public void SetRoutine(Func<InvocationContext, Task> routine)
+    {
+        _routine = routine;
+        
+        Recover.SetRoutine(routine);
+    }
+
     private async Task Routine(InvocationContext context)
     {
-        _impl.VideoId = context.ParseResult.GetValueForArgument(VideoId);
-        
-        _impl.Parse(context);
-        
-        await _impl.Routine(context);
+        // 设置视频id
+        Global.VideoId = context.ParseResult.GetValueForArgument(VideoId);
+
+        Message.ResolveResult(context);
+
+        await _routine(context);
     }
 }

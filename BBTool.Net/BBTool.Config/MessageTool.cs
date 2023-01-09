@@ -1,9 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
+using BBTool.Config.Files;
 using BBTool.Core;
 
 namespace BBTool.Config;
 
-public class MessageTool
+public static class MessageTool
 {
     public static readonly string AppName = Path.GetFileNameWithoutExtension(Environment.ProcessPath)!;
 
@@ -11,14 +12,19 @@ public class MessageTool
 
     public static readonly string AppDataDir = AppDir;
 
-    public static readonly string CookiePath = Path.Combine(MessageTool.AppDataDir, "bbtool_cookie.txt");
-
-    public static readonly string AppLogDir = Path.Combine(MessageTool.AppDataDir, MessageTool.AppName + "_logs");
+    public static readonly string AppLogDir = Path.Combine(AppDataDir, AppName + "_logs");
 
     public static readonly string
-        AppHistoryDir = Path.Combine(MessageTool.AppDataDir, MessageTool.AppName + "_history");
+        AppHistoryDir = Path.Combine(AppDataDir, AppName + "_history");
+
+    public static string CookiePath = Path.Combine(AppDataDir, "bbtool_cookie.txt");
 
     public static string Cookie = "";
+
+    /// <summary>
+    /// 全局配置
+    /// </summary>
+    public static MessageConfig Config = new();
 
     /// <summary>
     /// 信号量

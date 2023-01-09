@@ -6,9 +6,9 @@ namespace Camsg.Tasks;
 
 public class BatchMessage : BaseTask
 {
-    public override int TaskId => 3;
+    public override int TaskId => 4;
 
-    public Data Data { get; set; } = new();
+    public SendProgress SendProgress { get; set; } = new();
 
     public async Task<bool> Run(long sender, List<MidNamePair> receivers, string message)
     {
@@ -18,7 +18,7 @@ public class BatchMessage : BaseTask
 
             try
             {
-                Data = LoadData<Data>();
+                SendProgress = LoadData<SendProgress>();
             }
             catch (Exception e)
             {
@@ -30,7 +30,7 @@ public class BatchMessage : BaseTask
         using (var guard = new LocalTaskGuard())
         {
             {
-                int i = Data.Progress;
+                int i = SendProgress.Progress;
                 int n = receivers.Count;
                 for (; i < n; ++i)
                 {
@@ -85,10 +85,10 @@ public class BatchMessage : BaseTask
                         {
                             // 记录遇到错误的用户
                             HashSet<long> list;
-                            if (!Data.ErrorAttempts.TryGetValue(code, out list))
+                            if (!SendProgress.ErrorAttempts.TryGetValue(code, out list))
                             {
                                 list = new HashSet<long>();
-                                Data.ErrorAttempts.Add(code, list);
+                                SendProgress.ErrorAttempts.Add(code, list);
                             }
 
                             list.Add(mid);
@@ -102,17 +102,17 @@ public class BatchMessage : BaseTask
                     }
 
                     // 立即更新进度值
-                    Data.Progress = i + 1;
+                    SendProgress.Progress = i + 1;
 
                     // 避免发送请求太快，设置延时
-                    if (!guard.Sleep(skip ? Global.Config.GetTimeout : Global.Config.MessageTimeout))
+                    if (!guard.Sleep(skip ? MessageTool.Config.GetTimeout : MessageTool.Config.MessageTimeout))
                     {
                         break;
                     }
                 }
 
                 // 保存日志
-                SaveData(Data);
+                SaveData(SendProgress);
 
                 if (i < n)
                 {

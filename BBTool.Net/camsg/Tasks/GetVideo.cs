@@ -10,7 +10,7 @@ namespace Camsg.Tasks;
 
 public class GetVideo : BaseTask
 {
-    public override int TaskId => 0;
+    public override int TaskId => 1;
 
     public TaskBaseInfo Data { get; set; } = new();
 
@@ -31,10 +31,10 @@ public class GetVideo : BaseTask
             }
 
             // 若本次未指定消息内容
-            if (!string.IsNullOrEmpty(Data.SavedMessage) && string.IsNullOrEmpty(Global.Config.Message))
+            if (!string.IsNullOrEmpty(Data.SavedMessage) && string.IsNullOrEmpty(MessageTool.Config.Message))
             {
                 Logger.Log($"由于没有指定消息内容，使用日志中保存的代替");
-                Global.Config.Message = Data.SavedMessage;
+                MessageTool.Config.Message = Data.SavedMessage;
             }
         }
         else
@@ -57,6 +57,12 @@ public class GetVideo : BaseTask
                         Logger.LogError($"获取视频信息失败：{api.ErrorMessage}");
                         return false;
                     }
+                
+                    Logger.LogDebug($"AV号：{info.Avid}");
+                    Logger.LogColor($"作者：{info.UserName}");
+                    Logger.LogColor($"发布日期：{info.PublishTime}");
+                    Logger.LogColor($"标题：{info.Title}");
+                    Logger.LogColor($"分区：{info.Category}");
 
                     Data.VideoInfo = info;
                 }
@@ -70,6 +76,8 @@ public class GetVideo : BaseTask
                         Logger.LogError($"获取评论数失败：{api.ErrorMessage}");
                         return false;
                     }
+                    
+                    Logger.LogColor($"评论数：{info.Total}");
 
                     Data.CommentInfo = info;
                 }
@@ -81,19 +89,11 @@ public class GetVideo : BaseTask
             }
 
             // 保存消息内容
-            Data.SavedMessage = Global.Config.Message;
+            Data.SavedMessage = MessageTool.Config.Message;
 
             // 保存日志
             SaveData(Data);
         }
-
-        Logger.LogDebug($"AV号：{Data.VideoInfo.Avid}");
-
-        Logger.LogColor($"作者：{Data.VideoInfo.UserName}");
-        Logger.LogColor($"发布日期：{Data.VideoInfo.PublishTime}");
-        Logger.LogColor($"标题：{Data.VideoInfo.Title}");
-        Logger.LogColor($"分区：{Data.VideoInfo.Category}");
-        Logger.LogColor($"评论数：{Data.CommentInfo.Total}");
 
         return true;
     }

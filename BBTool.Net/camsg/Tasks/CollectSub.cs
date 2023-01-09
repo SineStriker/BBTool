@@ -1,5 +1,6 @@
 ﻿using BBDown.Core;
 using BBTool.Config;
+using BBTool.Config.Files;
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.LowLevel;
 using BBTool.Core.BiliApi.Video;
@@ -8,7 +9,7 @@ namespace Camsg.Tasks;
 
 public class CollectSub : BaseTask
 {
-    public override int TaskId => 2;
+    public override int TaskId => 3;
 
     public SubCommentProgress Data { get; set; } = new();
 
@@ -70,8 +71,8 @@ public class CollectSub : BaseTask
                 while (list.Count < total)
                 {
                     var api = new GetSubComments();
-                    var page = (int)((double)list.Count / AppConfig.NumPerPage) + 1;
-                    var comments = await api.Send(avid, item.Id, AppConfig.NumPerPage, page);
+                    var page = (int)((double)list.Count / MessageConfig.NumPerPage) + 1;
+                    var comments = await api.Send(avid, item.Id, MessageConfig.NumPerPage, page);
                     if (comments == null || comments.Count == 0)
                     {
                         Logger.LogError($"获取失败：{api.ErrorMessage}");
@@ -87,13 +88,13 @@ public class CollectSub : BaseTask
                     );
 
                     // 避免发送请求太快，设置延时
-                    if (!guard.Sleep(Global.Config.GetTimeout))
+                    if (!guard.Sleep(MessageTool.Config.GetTimeout))
                     {
                         failed = true;
                         break;
                     }
 
-                    if (comments.Count < AppConfig.NumPerPage)
+                    if (comments.Count < MessageConfig.NumPerPage)
                     {
                         commentList.Finished = true;
                         break;

@@ -13,7 +13,7 @@ public class Sys
         opt.WriteIndented = indented;
         return opt;
     }
-    
+
     public static string GetDevId()
     {
         char[] b = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -57,5 +57,29 @@ public class Sys
         }
 
         return default;
+    }
+
+    public static bool RemoveDirRecursively(string path)
+    {
+        var info = new DirectoryInfo(path);
+        if (info.Exists)
+        {
+            info.Delete(true);
+            return true;
+        }
+
+        return false;
+    }
+
+    public static bool RemoveFile(string path)
+    {
+        var info = new FileInfo(path);
+        if (info.Exists)
+        {
+            info.Delete();
+            return true;
+        }
+
+        return false;
     }
 }

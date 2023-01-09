@@ -4,6 +4,7 @@ using System.CommandLine.Invocation;
 using System.Text.Json;
 using BBDown.Core;
 using BBTool.Config;
+using BBTool.Config.Files;
 using BBTool.Core.LowLevel;
 
 namespace Camsg.Commands;
@@ -37,7 +38,7 @@ public class GenConfigCommand : Command
     {
         var info = context.ParseResult.GetValueForOption(Output);
 
-        var conf = new AppConfig();
+        var conf = new MessageConfig();
         conf.Message = "你好";
 
         // 生成默认配置信息后退出

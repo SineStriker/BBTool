@@ -1,11 +1,9 @@
 ﻿using BBTool.Config;
+using BBTool.Config.Files;
 
 namespace Camsg;
 
 public static class Global
 {
-    /// <summary>
-    /// 全局配置
-    /// </summary>
-    public static AppConfig Config = new();
+    public static string VideoId = "";
 }

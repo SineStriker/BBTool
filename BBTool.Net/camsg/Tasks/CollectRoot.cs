@@ -1,5 +1,6 @@
 ﻿using BBDown.Core;
 using BBTool.Config;
+using BBTool.Config.Files;
 using BBTool.Core.LowLevel;
 using BBTool.Core.BiliApi.Video;
 
@@ -7,7 +8,7 @@ namespace Camsg.Tasks;
 
 public class CollectRoot : BaseTask
 {
-    public override int TaskId => 1;
+    public override int TaskId => 2;
 
     public CommentProgress Data { get; set; } = new();
 
@@ -45,8 +46,8 @@ public class CollectRoot : BaseTask
             while (list.Count < total)
             {
                 var api = new GetRootComments();
-                var page = (int)((double)list.Count / AppConfig.NumPerPage) + 1;
-                var comments = await api.Send(avid, AppConfig.NumPerPage, page);
+                var page = (int)((double)list.Count / MessageConfig.NumPerPage) + 1;
+                var comments = await api.Send(avid, MessageConfig.NumPerPage, page);
                 if (comments == null || comments.Count == 0)
                 {
                     Logger.LogError($"获取失败：{api.ErrorMessage}");
@@ -61,13 +62,13 @@ public class CollectRoot : BaseTask
                     $"{list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{Text.ElideString(first.Message.Replace("\n", " "), 10)}");
 
                 // 避免发送请求太快，设置延时
-                if (!guard.Sleep(Global.Config.GetTimeout))
+                if (!guard.Sleep(MessageTool.Config.GetTimeout))
                 {
                     failed = true;
                     break;
                 }
 
-                if (comments.Count < AppConfig.NumPerPage)
+                if (comments.Count < MessageConfig.NumPerPage)
                 {
                     Data.Finished = true;
                     break;

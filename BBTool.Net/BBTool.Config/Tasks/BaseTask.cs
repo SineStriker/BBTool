@@ -16,6 +16,8 @@ public class BaseTask
 
     public bool DataExists => File.Exists(DataPath);
 
+    public void RemoveData() => Sys.RemoveFile(DataPath);
+
     public BaseTask()
     {
     }
@@ -82,7 +84,7 @@ public class LocalTaskGuard : IDisposable
                 for (int i = 0; i < num; ++i)
                 {
                     // 判断是否中断
-                    if (LocalInterrupt != 0)
+                    if (LocalInterrupt != 0 || MessageTool.Interrupt != 0)
                     {
                         interrupt = true;
                         return false;

@@ -1,6 +1,6 @@
-﻿namespace Camsg;
+﻿namespace BBTool.Config.Files;
 
-public class AppConfig
+public class MessageConfig
 {
     public static int DefaultGetTimeout = 1000;
 

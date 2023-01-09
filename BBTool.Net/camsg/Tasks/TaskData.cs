@@ -40,7 +40,7 @@ public class MidNamePair
     }
 }
 
-public class Data
+public class SendProgress
 {
     public int Progress { get; set; } = 0;
 
