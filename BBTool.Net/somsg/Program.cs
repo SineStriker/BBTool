@@ -21,29 +21,7 @@ public static class Program
         Console.WriteLine();
 
         var rootCommand = new AppCommand();
-        var parserBuilder = new CommandLineBuilder(rootCommand);
-
-        // 全局选项
-        var globalContent = new GlobalContent();
-        globalContent.Setup(parserBuilder);
-
-        // 没有命令行参数直接输出帮助信息
-        parserBuilder.AddMiddleware(async (context, next) =>
-        {
-            if (args.Length == 0)
-            {
-                var helpBld = new HelpBuilder(context.LocalizationResources, Console.WindowWidth);
-                helpBld.Write(context.ParseResult.CommandResult.Command, Console.Out);
-            }
-            else
-            {
-                await next(context);
-            }
-        });
-
-        parserBuilder.UseHelp("-h", "--help");
-        parserBuilder.UseVersionOption("-v", "--version");
-        parserBuilder.UseDefaults();
+        var parserBuilder = new MyParserBuilder(rootCommand, args);
 
         // 开始解析
         var parser = parserBuilder.Build();
