@@ -7,7 +7,7 @@ using BBTool.Config;
 using BBTool.Config.Files;
 using BBTool.Core.LowLevel;
 
-namespace Camsg.Commands;
+namespace BBTool.Config.Commands;
 
 public class GenConfigCommand : Command
 {
@@ -36,15 +36,20 @@ public class GenConfigCommand : Command
 
     private async Task ConfigRoutine(InvocationContext context)
     {
-        var info = context.ParseResult.GetValueForOption(Output);
+        var info = context.ParseResult.GetValueForOption(Output)!;
 
+        GenerateConfigFile(info);
+
+        Console.WriteLine($"写入默认配置文件到\"{info.Name}\"成功");
+    }
+
+    protected void GenerateConfigFile(FileInfo info)
+    {
         var conf = new MessageConfig();
         conf.Message = "你好";
 
         // 生成默认配置信息后退出
         // File.WriteAllText(info.FullName, JsonSerializer.Serialize(conf, AOT.Json.AppConfigCTX.Type));
         File.WriteAllText(info.FullName, JsonSerializer.Serialize(conf, Sys.UnicodeJsonSerializeOption(true)));
-
-        Console.WriteLine($"写入默认配置文件到\"{info.Name}\"成功");
     }
 }

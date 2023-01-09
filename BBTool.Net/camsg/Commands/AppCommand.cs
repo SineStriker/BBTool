@@ -2,6 +2,7 @@
 using System.CommandLine.Invocation;
 using BBTool.Config.Commands;
 using BBTool.Config.Commands.Affixes;
+using BBTool.Config.Files;
 
 namespace Camsg.Commands;
 
@@ -22,7 +23,7 @@ public class AppCommand : RootCommand
     public RecoverCommand Recover = new();
 
     // 复用选项
-    public MessageAffix Message;
+    public MessageAffix<MessageConfig> Message;
 
     // 控制流转移对象
     private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;
@@ -37,7 +38,7 @@ public class AppCommand : RootCommand
         Add(GenConfig);
         Add(Recover);
 
-        Message = new MessageAffix(this);
+        Message = new(this);
         Message.Setup();
 
         this.SetHandler(Routine);
@@ -46,7 +47,7 @@ public class AppCommand : RootCommand
     public void SetRoutine(Func<InvocationContext, Task> routine)
     {
         _routine = routine;
-        
+
         Recover.SetRoutine(routine);
     }
 

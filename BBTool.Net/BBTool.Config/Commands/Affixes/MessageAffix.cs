@@ -8,7 +8,7 @@ using BBTool.Core.LowLevel;
 
 namespace BBTool.Config.Commands.Affixes;
 
-public class MessageAffix : BaseAffix
+public class MessageAffix<T> : BaseAffix where T : MessageConfig
 {
     // 选项
     public Option<FileInfo> Config = new(new[] { "-c", "--config" }, "从配置文件获取参数")
@@ -51,8 +51,8 @@ public class MessageAffix : BaseAffix
         {
             var info = res.GetValueForOption(Config);
 
-            MessageTool.Config = JsonSerializer.Deserialize<MessageConfig>(
-                File.ReadAllBytes(info.FullName),
+            MessageTool.Config = JsonSerializer.Deserialize<T>(
+                File.ReadAllText(info.FullName),
                 Sys.UnicodeJsonSerializeOption()
             );
             if (MessageTool.Config == null)
