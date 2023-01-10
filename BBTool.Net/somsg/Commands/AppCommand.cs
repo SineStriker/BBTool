@@ -28,7 +28,7 @@ public class AppCommand : RootCommand
     // 控制流转移对象
     private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;
 
-    public AppCommand() : base("在 Bilibili 搜索关键词，选择特定分区与排序方式，对所有视频的 UP 主发送私信")
+    public AppCommand() : base($"在 {BBTool.Core.Global.Domain} 搜索关键词，选择特定分区与排序方式，对所有视频的 UP 主发送私信")
     {
         Add(KeyWord);
 

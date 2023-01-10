@@ -29,11 +29,12 @@ public static class Program
         // 介绍信息
         var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!;
         var intro =
-            $"{MessageTool.AppName} version {ver.Major}.{ver.Minor}.{ver.Build}, Bilibili Search and Message Tool";
+            $"{MessageTool.AppName} version {ver.Major}.{ver.Minor}.{ver.Build}, {BBTool.Core.Global.Domain} Search and Message Tool";
 
         Console.WriteLine(intro);
         Console.WriteLine();
 
+        // 配置命令
         var rootCommand = new AppCommand();
         rootCommand.SetRoutine(WorkRoutine);
 

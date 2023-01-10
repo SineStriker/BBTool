@@ -28,7 +28,7 @@ public class AppCommand : RootCommand
     // 控制流转移对象
     private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;
 
-    public AppCommand() : base("对 Bilibili 指定视频的评论区中的所有用户发送消息")
+    public AppCommand() : base($"对 {BBTool.Core.Global.Domain} 指定视频的评论区中的所有用户发送消息")
     {
         Add(VideoId);
 
