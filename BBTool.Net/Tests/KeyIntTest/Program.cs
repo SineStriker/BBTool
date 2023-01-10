@@ -9,7 +9,7 @@ public static class Program
 
     public static int Main(string[] args)
     {
-        Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss"));
+        Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"));
 
         // 添加退出事件
         AppDomain appd = AppDomain.CurrentDomain;

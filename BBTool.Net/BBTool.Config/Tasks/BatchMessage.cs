@@ -100,7 +100,9 @@ public class BatchMessage : BaseTask
                         }
                         else
                         {
-                            Logger.LogWarn($"{i + 1}/{n} {unameFormatted} 发送消息成功");
+                            Logger.LogColor($"{i + 1}/{n} {unameFormatted} 发送消息成功");
+
+                            Data.SendCount++;
                         }
                     }
 
@@ -113,6 +115,8 @@ public class BatchMessage : BaseTask
                         break;
                     }
                 }
+                
+                Logger.LogColor($"总共发送给了{Data.SendCount}个用户");
 
                 // 保存日志
                 await SaveDataAsync(Data);

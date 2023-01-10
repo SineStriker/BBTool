@@ -37,6 +37,8 @@ obj/
 /csharp/.tmp/
 /csharp/packages/
 
+build*/
+
 *.user
 .idea
 .vscode

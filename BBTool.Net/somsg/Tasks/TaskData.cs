@@ -6,12 +6,15 @@ public class CacheContent
 {
     public string KeyWord { get; set; } = "";
 
+    public int PartitionNum { get; set; } = (int)AppConfig.DefaultPartition;
+    
+    public int SorOrderNum { get; set; } = (int)AppConfig.DefaultSortOrder;
+
     public string SavedMessage { get; set; } = "";
 }
 
 public class SearchProgress
 {
-
     public bool Finished { get; set; } = false;
 
     public int CurrentPage { get; set; } = 0;

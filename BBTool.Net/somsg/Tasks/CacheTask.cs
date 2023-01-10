@@ -1,6 +1,7 @@
 ﻿using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Tasks;
+using BBTool.Core.LowLevel;
 
 namespace Somsg.Tasks;
 
@@ -37,6 +38,10 @@ public class CacheTask : BaseTask
             // 必须使用日志中的关键词
             Global.KeyWord = Data.KeyWord;
 
+            Global.Config.PartitionNum = Data.PartitionNum;
+
+            Global.Config.SortOrderNum = Data.SorOrderNum;
+
             // 若本次未指定消息内容
             if (string.IsNullOrEmpty(MessageTool.Config.Message))
             {
@@ -55,6 +60,7 @@ public class CacheTask : BaseTask
         else
         {
             var keyword = Global.KeyWord;
+            AppConfig.SortOrder order = AppConfig.DefaultSortOrder;
             if (string.IsNullOrEmpty(keyword))
             {
                 Logger.LogError("缺少关键词");
@@ -63,6 +69,20 @@ public class CacheTask : BaseTask
 
             // 保存关键词
             Data.KeyWord = keyword;
+
+            // 搜索方式检查
+            if (Enum.IsDefined(typeof(AppConfig.SortOrder), Global.Config.SortOrderNum))
+            {
+                order = (AppConfig.SortOrder)Global.Config.SortOrderNum;
+            }
+            else
+            {
+                Logger.LogWarn($"指定的排序方式不合法，使用{Sys.GetEnumDescription(order)}");
+            }
+
+            Data.PartitionNum = Global.Config.PartitionNum;
+
+            Data.SorOrderNum = (int)order;
 
             // 检查是否有消息内容
             if (string.IsNullOrEmpty(Global.Config.Message))

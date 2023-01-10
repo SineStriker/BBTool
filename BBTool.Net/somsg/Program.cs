@@ -28,7 +28,8 @@ public static class Program
 
         // 介绍信息
         var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!;
-        var intro = $"Search and Message Tool of Bilibili, version {ver.Major}.{ver.Minor}.{ver.Build}.";
+        var intro =
+            $"{MessageTool.AppName} version {ver.Major}.{ver.Minor}.{ver.Build}, Bilibili Search and Message Tool";
 
         Console.WriteLine(intro);
         Console.WriteLine();
@@ -157,7 +158,7 @@ public static class Program
                 ErrorAttempts = batchResult.ErrorAttempts,
             };
 
-            var filename = DateTime.Now.ToString("yyyy-MM-dd_hh-mm-ss") + ".json";
+            var filename = DateTime.Now.ToString(MessageTool.HistoryFileFormat) + ".json";
             var path = Path.Combine(MessageTool.AppHistoryDir, filename);
             await File.WriteAllTextAsync(path, JsonSerializer.Serialize(history, Sys.UnicodeJsonSerializeOption()));
             Logger.Log($"保存本次任务信息到\"{filename}\"中");

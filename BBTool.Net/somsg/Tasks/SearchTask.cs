@@ -39,16 +39,7 @@ public class SearchTask : BaseTask
         }
 
         var keyword = Global.KeyWord;
-
-        AppConfig.SortOrder order = AppConfig.DefaultSortOrder;
-        if (Enum.IsDefined(typeof(AppConfig.SortOrder), Global.Config.SortOrderNum))
-        {
-            order = (AppConfig.SortOrder)Global.Config.SortOrderNum;
-        }
-        else
-        {
-            Logger.LogWarn($"指定的排序方式不合法，使用{Sys.GetEnumDescription(order)}");
-        }
+        var order = (AppConfig.SortOrder)Global.Config.SortOrderNum;
 
         bool failed = false;
         using (var guard = new LocalTaskGuard())
@@ -90,7 +81,7 @@ public class SearchTask : BaseTask
 
                 var first = res.Videos.First();
                 Logger.Log(
-                    $"{page + 1}/{res.NumPages} 已获取{res.Videos.Count}条视频信息，第一条为\"{first.UserName}\"的：{Text.ElideString(first.Title.Replace("\n", " "), 10)}");
+                    $"{page + 1}/{res.NumPages} 已获取{res.Videos.Count}条视频信息，第一条为\"{first.UserName}\"的：{Text.ElideString(first.Title.Replace("\n", " "), 10)}，发布日期{first.PublishTime.ToString("yyyy-MM-dd HH:mm:ss")}");
 
                 // 避免发送请求太快，设置延时
                 if (!guard.Sleep(Global.Config.GetTimeout))
