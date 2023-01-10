@@ -2,10 +2,10 @@
 using System.CommandLine.Binding;
 using System.CommandLine.Invocation;
 using System.Text.Json;
+using A180.CoreLib.Text;
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Files;
-using BBTool.Core.LowLevel;
 
 namespace BBTool.Config.Commands;
 
@@ -43,14 +43,14 @@ public class GenConfigCommand : Command
         Console.WriteLine($"写入默认配置文件到\"{info.Name}\"成功");
     }
 
-    protected async virtual Task GenerateConfigFile(FileInfo info)
+    protected virtual async Task GenerateConfigFile(FileInfo info)
     {
-        var conf = new MessageConfig();
-        conf.Message = "你好";
+        var conf = new MessageConfig
+        {
+            Message = "你好",
+        };
 
         // 生成默认配置信息后退出
-        // File.WriteAllText(info.FullName, JsonSerializer.Serialize(conf, AOT.Json.AppConfigCTX.Type));
-        await File.WriteAllTextAsync(info.FullName,
-            JsonSerializer.Serialize(conf, Sys.UnicodeJsonSerializeOption(true)));
+        await AJson.SaveAsync(info.FullName, conf);
     }
 }

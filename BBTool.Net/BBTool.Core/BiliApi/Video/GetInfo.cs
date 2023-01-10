@@ -1,7 +1,8 @@
 ﻿using System.Text.Json;
+using A180.CoreLib.Kernel;
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 
 namespace BBTool.Core.BiliApi.Video;
 
@@ -41,7 +42,7 @@ public class GetInfo : SimpleRequest
                     Staffs = staffList,
                 };
             },
-            () => HttpNew.Get(ImplementUrl(vid), cookie)
+            () => HttpWrapper.Get(ImplementUrl(vid), cookie)
         );
     }
 

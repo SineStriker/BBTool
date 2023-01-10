@@ -9,23 +9,32 @@ namespace BBRsm.Daemon.Commands;
 public class ServerAffix : MessageAffix<AppConfig>
 {
     // 选项
+    public Option<string> KeyWord = new(new[] { "-k", "--keyword" }, "搜索关键词");
+
     public Option<int> Partition =
-        new("-s", $"分区号，默认值{(int)AppConfig.DefaultPartition}（{AppConfig.DefaultPartition.ToString()}）")
+        new(new[] { "-s", "--section" },
+            $"分区号，默认值{(int)AppConfig.DefaultPartition}（{AppConfig.DefaultPartition.ToString()}）")
         {
             ArgumentHelpName = "tid",
         };
 
-    /// <summary>
-    /// 不使用
-    /// </summary>
-    public Option<int> Order =
-        new(new[] { "-r", "--order" }, $"排序方式代号，综合0/最热1/最新2/弹幕3/收藏4/评论5，默认为{(int)AppConfig.DefaultSortOrder}")
-        {
-            ArgumentHelpName = "code",
-        };
+    public Option<int> BlockTimeout = new("--block-timeout", $"指定高频发送消息账户的睡眠时间（毫秒），默认值{AppConfig.DefaultBlockTimeout}")
+    {
+        ArgumentHelpName = "timeout",
+    };
+
+    public Option<int> SearchTimeout = new("--search-timeout", $"指定两次执行搜索的时间间隔（毫秒），默认值{AppConfig.DefaultSearchTimeout}")
+    {
+        ArgumentHelpName = "timeout",
+    };
+
+    public Option<int> WaitTimeout = new("--wait-timeout", $"指定因先决条件不足而循环等待的时间（毫秒），默认值{AppConfig.DefaultWaitTimeout}")
+    {
+        ArgumentHelpName = "timeout",
+    };
 
     public Option<int> Port =
-        new(new[] { "-p", "--port" }, $"监听端口号，默认为{Global.ServerPort}")
+        new(new[] { "-p", "--port" }, $"监听端口号，默认值{Global.ServerPort}")
         {
             ArgumentHelpName = "port",
         };
@@ -36,11 +45,16 @@ public class ServerAffix : MessageAffix<AppConfig>
 
     public override void Setup()
     {
-        base.Setup();
-
+        Command.Add(Config);
+        Command.Add(KeyWord);
+        Command.Add(Message);
+        Command.Add(T1);
+        Command.Add(T2);
         Command.Add(Partition);
-        // Command.Add(Order);
-        
+        Command.Add(BlockTimeout);
+        Command.Add(SearchTimeout);
+        Command.Add(WaitTimeout);
+
         Command.Add(Port);
     }
 
@@ -55,11 +69,21 @@ public class ServerAffix : MessageAffix<AppConfig>
             Global.Config.PartitionNum = res.GetValueForOption(Partition);
         }
 
-        if (res.HasOption(Order) && !UseConfigFile)
+        if (res.HasOption(BlockTimeout) && !UseConfigFile)
         {
-            Global.Config.SortOrderNum = res.GetValueForOption(Order);
+            Global.Config.BlockTimeout = res.GetValueForOption(BlockTimeout);
         }
-        
+
+        if (res.HasOption(SearchTimeout) && !UseConfigFile)
+        {
+            Global.Config.SearchTimeout = res.GetValueForOption(SearchTimeout);
+        }
+
+        if (res.HasOption(WaitTimeout) && !UseConfigFile)
+        {
+            Global.Config.WaitTimeout = res.GetValueForOption(WaitTimeout);
+        }
+
         if (res.HasOption(Port))
         {
             Global.ServerPort = res.GetValueForOption(Port);

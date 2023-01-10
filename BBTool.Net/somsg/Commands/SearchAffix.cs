@@ -9,7 +9,8 @@ namespace Somsg.Commands;
 public class SearchAffix : MessageAffix<AppConfig>
 {
     // 选项
-    public Option<int> Partition = new("-s", $"分区号，默认值{(int)AppConfig.DefaultPartition}（{AppConfig.DefaultPartition.ToString()}）")
+    public Option<int> Partition = new(new[] { "-s", "--section" },
+        $"分区号，默认值{(int)AppConfig.DefaultPartition}（{AppConfig.DefaultPartition.ToString()}）")
     {
         ArgumentHelpName = "tid",
     };

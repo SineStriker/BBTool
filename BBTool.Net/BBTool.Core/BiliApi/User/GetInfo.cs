@@ -1,6 +1,6 @@
 ﻿using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 
 namespace BBTool.Core.BiliApi.User;
 
@@ -17,7 +17,7 @@ public class GetInfo : SimpleRequest
                     Mid = obj.GetProperty("mid").GetInt64(),
                     UserName = obj.GetProperty("uname").GetString()!,
                 },
-            () => HttpNew.Get(ImplementUrl(), cookie)
+            () => HttpWrapper.Get(ImplementUrl(), cookie)
         );
     }
 }

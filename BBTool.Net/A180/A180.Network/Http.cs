@@ -2,9 +2,8 @@
 using System.Text;
 using System.Text.Json;
 using System.Web;
-using BBDown.Core;
 
-namespace BBTool.Core.LowLevel;
+namespace A180.Network;
 
 public static class Http
 {
@@ -13,7 +12,7 @@ public static class Http
 
     public static string Get(string url, string cookie = "")
     {
-        Logger.LogDebug($"发送 HTTP Get 请求：{url}");
+        // Logger.LogDebug($"发送 HTTP Get 请求：{url}");
 
         // 创建 HTTP 请求
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
@@ -36,15 +35,15 @@ public static class Http
             }
         }
 
-        Logger.LogDebug($"HTTP Get 响应：{source}");
+        // Logger.LogDebug($"HTTP Get 响应：{source}");
 
         return source;
     }
 
     public static string PostFormUrlEncoded(string url, byte[] bytes, string cookie = "")
     {
-        Logger.LogDebug($"Post 正文长度：{bytes.Length}");
-        Logger.LogDebug($"发送 HTTP Post 请求：{url}");
+        // Logger.LogDebug($"Post 正文长度：{bytes.Length}");
+        // Logger.LogDebug($"发送 HTTP Post 请求：{url}");
 
         // 创建 HTTP 请求
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
@@ -75,14 +74,14 @@ public static class Http
             }
         }
 
-        Logger.LogDebug($"HTTP Post 响应：{source}");
+        // Logger.LogDebug($"HTTP Post 响应：{source}");
 
         return source;
     }
 
     public static string PostFormUrlEncoded<T>(string url, IDictionary<string, T> fields, string cookie = "")
     {
-        Logger.LogDebug($"Post 表单：{JsonSerializer.Serialize(fields, Sys.UnicodeJsonSerializeOption())}");
+        // Logger.LogDebug($"Post 表单：{EasyJson.Serialize(fields)}");
 
         return PostFormUrlEncoded(url, Encoding.UTF8.GetBytes(Http.UrlEncode(fields)), cookie);
     }
@@ -90,7 +89,7 @@ public static class Http
     public static string UrlEncode<T>(IDictionary<string, T> fields)
     {
         return string.Join('&',
-            fields.Select(pair => HttpUtility.UrlEncode(pair.Key) + "=" + HttpUtility.UrlEncode(pair.Value.ToString()))
+            fields.Select(pair => HttpUtility.UrlEncode(pair.Key) + "=" + HttpUtility.UrlEncode(pair.Value!.ToString()))
                 .ToList());
     }
 }

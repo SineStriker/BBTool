@@ -10,4 +10,9 @@
       <PackageReference Include="QRCoder" Version="1.4.3" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\A180\A180.CoreLib\A180.CoreLib.csproj" />
+      <ProjectReference Include="..\A180\A180.Network\A180.Network.csproj" />
+    </ItemGroup>
+
 </Project>

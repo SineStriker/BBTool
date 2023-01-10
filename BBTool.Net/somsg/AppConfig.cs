@@ -37,10 +37,7 @@ public class AppConfig : MessageConfig
     public static SortOrder DefaultSortOrder = SortOrder.PubDate;
 
     /// <summary>
-    /// 默认分区
-    /// </summary>
-    /// <summary>
-    /// 默认子分区
+    /// 搜索分区
     /// </summary>
     public int PartitionNum { get; set; } = (int)DefaultPartition;
 

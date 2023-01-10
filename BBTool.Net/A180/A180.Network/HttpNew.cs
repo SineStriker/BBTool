@@ -1,9 +1,6 @@
 ﻿using System.Net;
-using System.Net.Http.Headers;
-using System.Text.Json;
-using BBDown.Core;
 
-namespace BBTool.Core.LowLevel;
+namespace A180.Network;
 
 public static class HttpNew
 {
@@ -19,7 +16,7 @@ public static class HttpNew
 
     public static async Task<string> Get(string url, string cookie = "", IDictionary<string, string> headerItems = null)
     {
-        Logger.LogDebug($"发送 HTTP Get 请求：{url}");
+        // Logger.LogDebug($"发送 HTTP Get 请求：{url}");
 
         // 创建 HTTP 请求
         var request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -51,7 +48,7 @@ public static class HttpNew
         var response = await Client.SendAsync(request);
         string htmlCode = await response.Content.ReadAsStringAsync();
 
-        Logger.LogDebug($"HTTP Get 响应：{htmlCode}");
+        // Logger.LogDebug($"HTTP Get 响应：{htmlCode}");
 
         return htmlCode;
     }
@@ -59,7 +56,7 @@ public static class HttpNew
     public static async Task<string> Post(string url, HttpContent content, string cookie = "",
         IDictionary<string, string> headerItems = null)
     {
-        Logger.LogDebug($"发送 HTTP Post 请求：{url}");
+        // Logger.LogDebug($"发送 HTTP Post 请求：{url}");
 
         // 创建 HTTP 请求
         var request = new HttpRequestMessage(HttpMethod.Post, url);
@@ -95,7 +92,7 @@ public static class HttpNew
         var response = await Client.SendAsync(request);
         string htmlCode = await response.Content.ReadAsStringAsync();
 
-        Logger.LogDebug($"HTTP Post 响应：{htmlCode}");
+        // Logger.LogDebug($"HTTP Post 响应：{htmlCode}");
 
         return htmlCode;
     }
@@ -104,9 +101,9 @@ public static class HttpNew
         string cookie = "",
         IDictionary<string, string> headerItems = null)
     {
-        Logger.LogDebug($"Post 表单：{JsonSerializer.Serialize(fields, Sys.UnicodeJsonSerializeOption())}");
+        // Logger.LogDebug($"Post 表单：{EasyJson.Serialize(fields)}");
         return await Post(url,
-            new FormUrlEncodedContent(fields.ToDictionary(pair => pair.Key, pair => pair.Value.ToString())),
+            new FormUrlEncodedContent(fields.ToDictionary(pair => pair.Key, pair => pair.Value!.ToString())),
             cookie,
             headerItems
         );

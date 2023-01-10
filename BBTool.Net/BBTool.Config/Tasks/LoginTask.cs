@@ -29,7 +29,7 @@ public class LoginTask : BaseTask
         var qrcodeInfo = new FileInfo(QRCodePath);
 
         // 结束后删除二维码文件
-        var rmQRCode = () =>
+        var rmQRCode = () => 
         {
             if (qrcodeInfo.Exists)
             {

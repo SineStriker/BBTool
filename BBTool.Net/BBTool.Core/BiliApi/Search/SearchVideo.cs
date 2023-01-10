@@ -1,8 +1,9 @@
 ﻿using System.Text.Json;
 using System.Web;
+using A180.CoreLib.Kernel;
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 
 namespace BBTool.Core.BiliApi.Search;
 
@@ -50,7 +51,7 @@ public class SearchVideo : SimpleRequest
 
                 return res;
             }
-            , () => HttpNew.Get(ImplementUrl(keywordEncoded, order, tid, page), cookie,
+            , () => HttpWrapper.Get(ImplementUrl(keywordEncoded, order, tid, page), cookie,
                 new Dictionary<string, string>
                 {
                     { "Referer", $"https://search.bilibili.com/all?keyword={keywordEncoded}" },

@@ -2,7 +2,7 @@
 
 using System.ComponentModel;
 using System.Text.Json;
-using BBTool.Core.LowLevel;
+using A180.CoreLib.Text;
 
 public static class Program
 {
@@ -18,7 +18,7 @@ public static class Program
 
     public static int Main(string[] args)
     {
-        Console.WriteLine(JsonSerializer.Serialize(new Derived(), Sys.UnicodeJsonSerializeOption()));
+        Console.WriteLine(AJson.Serialize(new Derived()));
         return 0;
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 
 namespace BBTool.Core.BiliApi.Video;
 
@@ -22,7 +22,7 @@ public class GetCommentCount : SimpleRequest
                     Root = obj.GetProperty("page").GetProperty("count").GetInt32(),
                     Total = obj.GetProperty("page").GetProperty("acount").GetInt32(),
                 },
-            () => HttpNew.Get(ImplementUrl(avid), cookie)
+            () => HttpWrapper.Get(ImplementUrl(avid), cookie)
         );
     }
 }

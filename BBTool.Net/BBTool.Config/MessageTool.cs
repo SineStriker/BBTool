@@ -1,4 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections;
+using System.Runtime.CompilerServices;
+using A180.CoreLib.Collections.Extensions;
+using A180.CoreLib.Kernel.Extensions;
 using BBTool.Config.Files;
 using BBTool.Core;
 
@@ -6,9 +9,9 @@ namespace BBTool.Config;
 
 public static class MessageTool
 {
-    public static readonly string AppName = Path.GetFileNameWithoutExtension(Environment.ProcessPath)!;
+    public static readonly string AppName = Environment.ProcessPath!.BaseName();
 
-    public static readonly string AppDir = Path.GetDirectoryName(Environment.ProcessPath)!;
+    public static readonly string AppDir = Environment.ProcessPath!.DirName()!;
 
     public static readonly string AppDataDir = AppDir;
 
@@ -66,28 +69,12 @@ public static class MessageTool
                 // 等待主线程同意退出
             }
 
-            foreach (var action in ActionsAfterExit)
-            {
-                action.Invoke();
-            }
+            ActionsAfterExit.ForEach(item => item.Invoke());
 
             if (RemoveTempFilesAfterExit)
             {
                 // 删除所有临时文件
-                foreach (var info in Global.TempFiles)
-                {
-                    if (info.Exists)
-                    {
-                        if (info is DirectoryInfo dirInfo)
-                        {
-                            dirInfo.Delete(true);
-                        }
-                        else
-                        {
-                            info.Delete();
-                        }
-                    }
-                }
+                Global.TempFiles.ForEach(item => item.Remove());
             }
         };
 

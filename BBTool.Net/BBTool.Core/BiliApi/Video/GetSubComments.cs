@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 
 namespace BBTool.Core.BiliApi.Video;
 
@@ -36,7 +36,7 @@ public class GetSubComments : SimpleRequest
 
                 return comments;
             },
-            () => HttpNew.Get(ImplementUrl(avid, replyId, numPerPage, page), cookie)
+            () => HttpWrapper.Get(ImplementUrl(avid, replyId, numPerPage, page), cookie)
         );
     }
 }

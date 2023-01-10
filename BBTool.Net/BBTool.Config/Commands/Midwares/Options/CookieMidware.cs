@@ -1,13 +1,14 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
+using A180.CoreLib.Kernel.Extensions;
 
 namespace BBTool.Config.Commands.Midwares;
 
 public class CookieMidware : BaseMidware
 {
     public Option<FileInfo> CookiePath =
-        new("--cookie", () => new FileInfo(Path.GetFileName(MessageTool.CookiePath)), "设置Cookie路径")
+        new("--cookie", () => new FileInfo(MessageTool.CookiePath.FileName()), "设置Cookie路径")
         {
             ArgumentHelpName = "file",
         };

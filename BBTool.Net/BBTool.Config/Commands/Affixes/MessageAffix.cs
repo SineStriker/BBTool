@@ -2,9 +2,9 @@
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Text.Json;
+using A180.CoreLib.Text;
 using BBTool.Config.Files;
 using BBTool.Core;
-using BBTool.Core.LowLevel;
 
 namespace BBTool.Config.Commands.Affixes;
 
@@ -51,10 +51,7 @@ public class MessageAffix<T> : BaseAffix where T : MessageConfig
         {
             var info = res.GetValueForOption(Config);
 
-            MessageTool.Config = JsonSerializer.Deserialize<T>(
-                File.ReadAllText(info.FullName),
-                Sys.UnicodeJsonSerializeOption()
-            );
+            MessageTool.Config = AJson.Load<T>(info.FullName);
             if (MessageTool.Config == null)
             {
                 throw new FormatException($"{info.FullName} 格式不正确");

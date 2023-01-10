@@ -1,15 +1,15 @@
 ﻿using System.Text;
 
-namespace BBTool.Core.LowLevel;
+namespace A180.CoreLib.Text;
 
-public static class Text
+public static class AStrings
 {
-    public static string ElideString(string s, int len)
+    public static string Elide(string s, int len)
     {
         return s.Length <= len ? s : $"{s.Substring(0, len)}...";
     }
 
-    public static string PadString(string s, int len)
+    public static string Pad(string s, int len)
     {
         Encoding coding = Encoding.GetEncoding("gb2312");
         int count = 0;

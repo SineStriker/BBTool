@@ -1,8 +1,11 @@
 ﻿using System.Text.Json;
+using A180.CoreLib.Collections;
+using A180.CoreLib.Kernel;
+using A180.CoreLib.Kernel.Extensions;
+using A180.CoreLib.Text;
 using BBDown;
 using BBDown.Core;
 using BBTool.Config;
-using BBTool.Core.LowLevel;
 
 namespace BBTool.Config.Tasks;
 
@@ -14,9 +17,9 @@ public class BaseTask
 
     public virtual string DataPath => Path.Combine(TaskLogDir, $"task_{TaskId}.json");
 
-    public bool DataExists => File.Exists(DataPath);
+    public bool DataExists => DataPath.IsFile();
 
-    public void RemoveData() => Sys.RemoveFile(DataPath);
+    public void RemoveData() => DataPath.RmFile();
 
     private int _taskId = -1;
 
@@ -27,22 +30,22 @@ public class BaseTask
 
     public T LoadData<T>()
     {
-        return JsonSerializer.Deserialize<T>(File.ReadAllText(DataPath), Sys.UnicodeJsonSerializeOption())!;
-    }
-
-    public void SaveData<T>(T data)
-    {
-        File.WriteAllText(DataPath, JsonSerializer.Serialize(data, Sys.UnicodeJsonSerializeOption()));
+        return AJson.Load<T>(DataPath);
     }
 
     public async Task<T> LoadDataAsync<T>()
     {
-        return JsonSerializer.Deserialize<T>(await File.ReadAllTextAsync(DataPath), Sys.UnicodeJsonSerializeOption())!;
+        return await AJson.LoadAsync<T>(DataPath);
+    }
+
+    public void SaveData<T>(T data)
+    {
+        AJson.Save(DataPath, data);
     }
 
     public async Task SaveDataAsync<T>(T data)
     {
-        await File.WriteAllTextAsync(DataPath, JsonSerializer.Serialize(data, Sys.UnicodeJsonSerializeOption()));
+        await AJson.SaveAsync(DataPath, data);
     }
 }
 
@@ -80,6 +83,8 @@ public class LocalTaskGuard : IDisposable
         LocalInterrupt = 1;
     }
 
+    public PredicateSet Cancelers { get; } = new();
+
     /// <summary>
     /// 睡眠，直到超时或中断
     /// </summary>
@@ -97,7 +102,7 @@ public class LocalTaskGuard : IDisposable
                 for (int i = 0; i < num; ++i)
                 {
                     // 判断是否中断
-                    if (LocalInterrupt != 0 || MessageTool.Interrupt != 0)
+                    if (LocalInterrupt != 0 || MessageTool.Interrupt != 0 || Cancelers.Yes)
                     {
                         interrupt = true;
                         return false;

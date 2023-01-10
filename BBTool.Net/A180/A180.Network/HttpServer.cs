@@ -1,17 +1,16 @@
-﻿using BBDown.Core;
+﻿using A180.CoreLib.Collections;
 
-namespace BBRsm.Daemon.Server;
+namespace A180.Network;
 
 using System;
-using System.IO;
 using System.Text;
 using System.Net;
 using System.Threading.Tasks;
 
 // https://gist.github.com/define-private-public/d05bc52dd0bed1c4699d49e2737e80e7
-public class SimpleHttpServer
+public class HttpServer
 {
-    public SimpleHttpServer(string url)
+    public HttpServer(string url)
     {
         Url = url;
         Listener.Prefixes.Add(url + (url.EndsWith("/") ? "" : "/"));
@@ -42,7 +41,7 @@ public class SimpleHttpServer
 
     public bool IsListening => Listener.IsListening;
 
-    public List<Func<bool>> Cancelers { get; } = new();
+    public PredicateSet Cancelers { get; } = new();
 
     private Func<HttpListenerRequest, HttpListenerResponse, Task<bool>> _handler = null;
 
@@ -59,17 +58,9 @@ public class SimpleHttpServer
             {
                 Thread.Sleep(100);
 
-                foreach (var item in Cancelers)
+                if (Cancelers.Yes)
                 {
-                    if (item.Invoke())
-                    {
-                        cancel = true;
-                        break;
-                    }
-                }
-
-                if (cancel)
-                {
+                    cancel = true;
                     Listener.Stop();
                 }
             }
@@ -152,7 +143,7 @@ public class SimpleHttpServer
 
     public static async Task RunExampleServer()
     {
-        var server = new SimpleHttpServer("http://localhost:8000/");
+        var server = new HttpServer("http://localhost:8000/");
         var handler = new ExampleHandler();
 
         Console.WriteLine("Listening for connections on {0}", server.Url);

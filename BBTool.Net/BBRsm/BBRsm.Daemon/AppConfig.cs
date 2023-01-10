@@ -37,11 +37,14 @@ public class AppConfig : MessageConfig
 
     public static SortOrder DefaultSortOrder = SortOrder.PubDate;
 
+    public static long DefaultBlockTimeout = 864000000;
+
+    public static long DefaultSearchTimeout = 7200000;
+
+    public static int DefaultWaitTimeout = 1000;
+
     /// <summary>
-    /// 默认分区
-    /// </summary>
-    /// <summary>
-    /// 默认子分区
+    /// 搜索分区
     /// </summary>
     public int PartitionNum { get; set; } = (int)DefaultPartition;
 
@@ -50,4 +53,10 @@ public class AppConfig : MessageConfig
     /// </summary>
     [JsonIgnore]
     public int SortOrderNum { get; set; } = (int)DefaultSortOrder;
+
+    public long BlockTimeout { get; set; } = DefaultBlockTimeout;
+
+    public long SearchTimeout { get; set; } = DefaultSearchTimeout;
+
+    public int WaitTimeout { get; set; } = DefaultWaitTimeout;
 }

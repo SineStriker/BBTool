@@ -3,14 +3,15 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using System.Text.Json;
+using A180.CoreLib.Kernel;
+using A180.CoreLib.Kernel.Extensions;
+using A180.CoreLib.Text;
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Commands.Extensions;
 using BBTool.Config.Files;
 using BBTool.Config.Tasks;
 using BBTool.Core.BiliApi.Entities;
-using BBTool.Core.LowLevel;
 using Camsg.Commands;
 using Camsg.Tasks;
 
@@ -20,9 +21,6 @@ public static class Program
 {
     public static async Task<int> Main(string[] args)
     {
-        // 添加终端编码信息
-        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
         // 设置默认配置信息
         MessageTool.Config = new MessageConfig();
 
@@ -70,11 +68,11 @@ public static class Program
             // 删除旧的日志
             if (!MessageTool.RecoveryMode)
             {
-                Sys.RemoveDirRecursively(MessageTool.AppLogDir);
+                MessageTool.AppLogDir.RmDir();
             }
 
-            Directory.CreateDirectory(MessageTool.AppLogDir);
-            Directory.CreateDirectory(MessageTool.AppHistoryDir);
+            MessageTool.AppLogDir.MkDir();
+            MessageTool.AppHistoryDir.MkDir();
         };
 
         // 全局捕获关闭事件
@@ -166,7 +164,7 @@ public static class Program
 
         Logger.Log("第四步");
         Logger.Log($"向所有用户发送消息，每{Global.Config.MessageTimeout}毫秒发送一次...");
-        Logger.LogColor($"消息内容：{Text.ElideString(message, 10)}");
+        Logger.LogColor($"消息内容：{AStrings.Elide(message, 10)}");
 
         // return;
 
@@ -184,7 +182,7 @@ public static class Program
 
         Logger.Log("任务完成，删除所有日志");
 
-        Sys.RemoveDirRecursively(MessageTool.AppLogDir);
+        MessageTool.AppLogDir.RmDir();
 
         // 保存任务历史
         {
@@ -197,7 +195,7 @@ public static class Program
 
             var filename = DateTime.Now.ToString(MessageTool.HistoryFileFormat) + ".json";
             var path = Path.Combine(MessageTool.AppHistoryDir, filename);
-            await File.WriteAllTextAsync(path, JsonSerializer.Serialize(history, Sys.UnicodeJsonSerializeOption()));
+            await AJson.SaveAsync(path, history);
             Logger.Log($"保存本次任务信息到\"{filename}\"中");
         }
     }

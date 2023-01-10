@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
+using A180.CoreLib.Kernel;
 using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 
 namespace BBTool.Core.BiliApi.User;
 
@@ -43,6 +44,6 @@ public class SendMessage : SimpleRequest
             { "csrf", csrf },
         };
 
-        return await GetData(_ => _code == 0, () => HttpNew.PostFormUrlEncoded(ImplementUrl(), fields, cookie));
+        return await GetData(_ => _code == 0, () => HttpWrapper.PostFormUrlEncoded(ImplementUrl(), fields, cookie));
     }
 }

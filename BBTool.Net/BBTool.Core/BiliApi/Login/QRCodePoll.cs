@@ -1,6 +1,5 @@
 ﻿using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
-
+using BBTool.Core.Network;
 using PollResult = BBTool.Core.BiliApi.Entities.QRCode.PollResult;
 
 namespace BBTool.Core.BiliApi.Login;
@@ -16,6 +15,6 @@ public class QRCodePoll : SimpleRequest
         {
             Code = obj.GetProperty("code").GetInt32(),
             Url = obj.GetProperty("url").GetString()!,
-        }, () => HttpNew.Get(ImplementUrl(key)));
+        }, () => HttpWrapper.Get(ImplementUrl(key)));
     }
 }

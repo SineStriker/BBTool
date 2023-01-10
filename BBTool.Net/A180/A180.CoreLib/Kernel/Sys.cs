@@ -4,18 +4,10 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
-namespace BBTool.Core.LowLevel;
+namespace A180.CoreLib.Kernel;
 
 public static class Sys
 {
-    public static JsonSerializerOptions UnicodeJsonSerializeOption(bool indented = false)
-    {
-        var opt = new JsonSerializerOptions();
-        opt.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
-        opt.WriteIndented = indented;
-        return opt;
-    }
-
     public static string GetDevId()
     {
         char[] b = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
@@ -70,29 +62,5 @@ public static class Sys
             return value;
         DescriptionAttribute descriptionAttribute = (DescriptionAttribute)objs[0];
         return descriptionAttribute.Description;
-    }
-
-    public static bool RemoveDirRecursively(string path)
-    {
-        var info = new DirectoryInfo(path);
-        if (info.Exists)
-        {
-            info.Delete(true);
-            return true;
-        }
-
-        return false;
-    }
-
-    public static bool RemoveFile(string path)
-    {
-        var info = new FileInfo(path);
-        if (info.Exists)
-        {
-            info.Delete();
-            return true;
-        }
-
-        return false;
     }
 }

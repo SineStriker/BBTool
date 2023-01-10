@@ -1,5 +1,5 @@
 ﻿using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 using GenerateResult = BBTool.Core.BiliApi.Entities.QRCode.GenerateResult;
 
 namespace BBTool.Core.BiliApi.Login;
@@ -15,6 +15,6 @@ public class QRCodeGen : SimpleRequest
                 Url = obj.GetProperty("url").GetString()!,
                 Key = obj.GetProperty("qrcode_key").GetString()!,
             },
-            () => HttpNew.Get(ImplementUrl()));
+            () => HttpWrapper.Get(ImplementUrl()));
     }
 }

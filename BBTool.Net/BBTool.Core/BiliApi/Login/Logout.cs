@@ -1,5 +1,5 @@
 ﻿using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 
 namespace BBTool.Core.BiliApi.Login;
 
@@ -21,6 +21,6 @@ public class Logout : SimpleRequest
             { "biliCSRF", csrf },
         };
 
-        return await GetData(_ => _code == 0, () => HttpNew.PostFormUrlEncoded(ImplementUrl(), fields, cookie), true);
+        return await GetData(_ => _code == 0, () => HttpWrapper.PostFormUrlEncoded(ImplementUrl(), fields, cookie), true);
     }
 }

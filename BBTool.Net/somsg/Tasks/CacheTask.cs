@@ -1,7 +1,7 @@
-﻿using BBDown.Core;
+﻿using A180.CoreLib.Kernel;
+using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Tasks;
-using BBTool.Core.LowLevel;
 
 namespace Somsg.Tasks;
 

@@ -1,9 +1,9 @@
-﻿using BBDown.Core;
+﻿using A180.CoreLib.Text;
+using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Files;
 using BBTool.Config.Tasks;
 using BBTool.Core.BiliApi.Entities;
-using BBTool.Core.LowLevel;
 using BBTool.Core.BiliApi.Video;
 
 namespace Camsg.Tasks;
@@ -87,7 +87,7 @@ public class CollectSub : BaseTask
 
                     var first = comments.First();
                     Logger.Log(
-                        $"{idx}/{sum} {list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{Text.ElideString(first.Message.Replace("\n", " "), 10)}"
+                        $"{idx}/{sum} {list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{AStrings.Elide(first.Message.Replace("\n", " "), 10)}"
                     );
 
                     // 避免发送请求太快，设置延时

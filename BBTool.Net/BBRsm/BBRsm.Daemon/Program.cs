@@ -5,10 +5,11 @@ using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Net;
+using A180.CoreLib.Text;
+using A180.Network;
 using BBDown.Core;
 using BBRsm.Core;
 using BBRsm.Daemon.Commands;
-using BBRsm.Daemon.Server;
 using BBTool.Config;
 using BBTool.Config.Commands.Extensions;
 using BBTool.Config.Files;
@@ -22,11 +23,8 @@ public static class Program
         // await SimpleHttpServer.RunExampleServer();
         // return 0;
 
-        // 添加终端编码信息
-        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
-
         // 设置默认配置信息
-        MessageTool.Config = new MessageConfig();
+        MessageTool.Config = new AppConfig();
 
         // 介绍信息
         var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version!;
@@ -71,7 +69,7 @@ public static class Program
         Logger.Log($"启动服务监听，端口号{Global.ServerPort}...");
 
         // 启动服务
-        Global.Server = new SimpleHttpServer($"http://localhost:{Global.ServerPort}");
+        Global.Server = new HttpServer($"http://localhost:{Global.ServerPort}");
 
         // 添加中断
         MessageTool.InstallInterruptFilter();

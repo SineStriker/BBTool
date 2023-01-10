@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.Interfaces;
-using BBTool.Core.LowLevel;
+using BBTool.Core.Network;
 
 namespace BBTool.Core.BiliApi.User;
 
@@ -31,7 +31,7 @@ public class GetRecentTalk : SimpleRequest
 
                 return msgList;
             },
-            () => HttpNew.Get(ImplementUrl(talkerId, count), cookie)
+            () => HttpWrapper.Get(ImplementUrl(talkerId, count), cookie)
         );
     }
 }

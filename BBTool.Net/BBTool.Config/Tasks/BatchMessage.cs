@@ -1,4 +1,5 @@
-﻿using BBDown.Core;
+﻿using A180.CoreLib.Text;
+using BBDown.Core;
 using BBTool.Config;
 using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.User;
@@ -41,7 +42,7 @@ public class BatchMessage : BaseTask
 
                     var mid = receiver.Mid;
                     var uname = receiver.Name;
-                    var unameFormatted = BBTool.Core.LowLevel.Text.PadString(uname, 20);
+                    var unameFormatted = AStrings.Pad(uname, 20);
 
                     bool skip = false;
 
