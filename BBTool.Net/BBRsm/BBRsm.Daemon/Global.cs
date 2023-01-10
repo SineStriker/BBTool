@@ -1,4 +1,4 @@
-﻿using A180.Network;
+﻿using A180.Network.Http;
 using BBTool.Config;
 
 namespace BBRsm.Daemon;

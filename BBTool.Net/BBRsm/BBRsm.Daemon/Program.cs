@@ -7,6 +7,7 @@ using System.CommandLine.Parsing;
 using System.Net;
 using A180.CoreLib.Text;
 using A180.Network;
+using A180.Network.Http;
 using BBDown.Core;
 using BBRsm.Core;
 using BBRsm.Daemon.Commands;

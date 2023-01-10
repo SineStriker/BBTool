@@ -1,6 +1,6 @@
 ﻿using System.CommandLine.Builder;
 
-namespace BBTool.Config.Commands.Midwares;
+namespace A180.CommandLine.Midwares;
 
 public class BaseMidware
 {

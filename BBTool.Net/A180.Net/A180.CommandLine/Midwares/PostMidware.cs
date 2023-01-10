@@ -1,9 +1,7 @@
-﻿using System.CommandLine;
-using System.CommandLine.Builder;
+﻿using System.CommandLine.Builder;
 using System.CommandLine.Help;
-using System.CommandLine.Parsing;
 
-namespace BBTool.Config.Commands.Midwares;
+namespace A180.CommandLine.Midwares;
 
 /// <summary>
 /// 最后安装

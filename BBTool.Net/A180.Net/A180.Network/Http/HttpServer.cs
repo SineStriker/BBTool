@@ -1,6 +1,6 @@
 ﻿using A180.CoreLib.Collections;
 
-namespace A180.Network;
+namespace A180.Network.Http;
 
 using System;
 using System.Text;

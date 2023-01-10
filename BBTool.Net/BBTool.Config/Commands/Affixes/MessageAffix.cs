@@ -2,6 +2,7 @@
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Text.Json;
+using A180.CommandLine.Affixes;
 using A180.CoreLib.Text;
 using BBTool.Config.Files;
 using BBTool.Core;

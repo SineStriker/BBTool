@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace A180.Network;
+namespace A180.Network.Http;
 
 public static class HttpNew
 {

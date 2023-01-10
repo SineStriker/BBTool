@@ -7,11 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\A180.Net\A180.CommandLine\A180.CommandLine.csproj" />
-      <ProjectReference Include="..\BBTool.Core\BBTool.Core.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     </ItemGroup>
 

@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Json;
 using System.Web;
 
-namespace A180.Network;
+namespace A180.Network.Http;
 
 public static class Http
 {

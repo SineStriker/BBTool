@@ -1,6 +1,5 @@
-﻿using A180.CoreLib.Kernel;
-using A180.Network;
-using A180.CoreLib.Text;
+﻿using A180.CoreLib.Text;
+using A180.Network.Http;
 using BBDown.Core;
 
 namespace BBTool.Core.Network;

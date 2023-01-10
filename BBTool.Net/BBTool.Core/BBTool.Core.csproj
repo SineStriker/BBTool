@@ -11,8 +11,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\A180\A180.CoreLib\A180.CoreLib.csproj" />
-      <ProjectReference Include="..\A180\A180.Network\A180.Network.csproj" />
+      <ProjectReference Include="..\A180.Net\A180.CoreLib\A180.CoreLib.csproj" />
+      <ProjectReference Include="..\A180.Net\A180.Network\A180.Network.csproj" />
     </ItemGroup>
 
 </Project>

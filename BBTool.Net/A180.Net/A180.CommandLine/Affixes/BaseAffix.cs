@@ -2,7 +2,7 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 
-namespace BBTool.Config.Commands.Affixes;
+namespace A180.CommandLine.Affixes;
 
 public class BaseAffix
 {

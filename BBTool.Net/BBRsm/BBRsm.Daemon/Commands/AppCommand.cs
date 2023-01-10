@@ -1,9 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using A180.CommandLine.Affixes;
 using BBRsm.Core;
-using BBTool.Config.Commands;
-using BBTool.Config.Commands.Affixes;
-using BBTool.Config.Files;
 
 namespace BBRsm.Daemon.Commands;
 
