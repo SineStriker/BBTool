@@ -13,10 +13,10 @@ public class OptionMidware<T> : TemplateMidware
     /// <summary>
     /// 创建模板实例，处理函数第一个参数为是否包含该选项，第二个参数为获取值的函数（可能抛出异常）
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="option"></param>
+    /// <param name="builder">命令行构造器</param>
+    /// <param name="option">要加入全局的选项</param>
     /// <param name="optionHandler">选项处理函数，true则继续，false则中断</param>
-    public static OptionMidware<T> Create(CommandLineBuilder builder, Option<T> option,
+    public static OptionMidware<T> CreateGlobal(CommandLineBuilder builder, Option<T> option,
         Func<bool, Func<T>, bool> optionHandler)
     {
         return new OptionMidware<T>(builder)

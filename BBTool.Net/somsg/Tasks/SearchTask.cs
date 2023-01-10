@@ -1,4 +1,5 @@
 ﻿using A180.CoreLib.Text;
+using A180.CoreLib.Text.Extensions;
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Tasks;
@@ -81,7 +82,7 @@ public class SearchTask : BaseTask
 
                 var first = res.Videos.First();
                 Logger.Log(
-                    $"{page + 1}/{res.NumPages} 已获取{res.Videos.Count}条视频信息，第一条为\"{first.UserName}\"的：{AStrings.Elide(first.Title.Replace("\n", " "), 10)}，发布日期{first.PublishTime.ToString("yyyy-MM-dd HH:mm:ss")}");
+                    $"{page + 1}/{res.NumPages} 已获取{res.Videos.Count}条视频信息，第一条为\"{first.UserName}\"的：{first.Title.Replace("\n", " ").Elide(10)}，发布日期{first.PublishTime.ToString("yyyy-MM-dd HH:mm:ss")}");
 
                 // 避免发送请求太快，设置延时
                 if (!guard.Sleep(Global.Config.GetTimeout))

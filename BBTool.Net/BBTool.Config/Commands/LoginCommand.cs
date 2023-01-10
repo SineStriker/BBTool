@@ -24,6 +24,6 @@ public class LoginCommand : Command
 
         // 写入Cookie
         Logger.Log($"保存本地cookie");
-        File.WriteAllText(MessageTool.CookiePath, cookie);
+        await File.WriteAllTextAsync(MessageTool.CookiePath, cookie);
     }
 }

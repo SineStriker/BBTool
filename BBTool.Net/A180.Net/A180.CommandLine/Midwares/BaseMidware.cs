@@ -9,8 +9,7 @@ public class BaseMidware
     /// <summary>
     /// 为 CommandLineBuilder 设置
     /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="args">入口命令行参数</param>
+    /// <param name="builder">命令行构造器</param>
     public BaseMidware(CommandLineBuilder builder)
     {
         Builder = builder;
@@ -21,5 +20,15 @@ public class BaseMidware
     /// </summary>
     public virtual void Setup()
     {
+    }
+
+    /// <summary>
+    /// 安装后的（为了与无返回函数不同名强行加ed）
+    /// </summary>
+    /// <returns>安装完毕的命令行构造器</returns>
+    public CommandLineBuilder Setuped()
+    {
+        Setup();
+        return Builder;
     }
 }

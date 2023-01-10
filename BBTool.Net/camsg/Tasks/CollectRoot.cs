@@ -1,4 +1,5 @@
 ﻿using A180.CoreLib.Text;
+using A180.CoreLib.Text.Extensions;
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Files;
@@ -10,7 +11,7 @@ namespace Camsg.Tasks;
 public class CollectRoot : BaseTask
 {
     public CommentProgress Data { get; set; } = new();
-    
+
     public CollectRoot(int tid) : base(tid)
     {
     }
@@ -62,7 +63,7 @@ public class CollectRoot : BaseTask
 
                 var first = comments.First();
                 Logger.Log(
-                    $"{list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{AStrings.Elide(first.Message.Replace("\n", " "), 10)}");
+                    $"{list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{first.Message.Replace("\n", " ").Elide(10)}");
 
                 // 避免发送请求太快，设置延时
                 if (!guard.Sleep(Global.Config.GetTimeout))

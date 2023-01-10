@@ -1,4 +1,5 @@
 ﻿using A180.CoreLib.Text;
+using A180.CoreLib.Text.Extensions;
 using A180.Network.Http;
 using BBDown.Core;
 
@@ -33,7 +34,7 @@ public static class HttpWrapper
         string cookie = "",
         IDictionary<string, string> headerItems = null)
     {
-        Logger.LogDebug($"Post 表单：{AJson.Serialize(fields)}");
+        Logger.LogDebug($"Post 表单：{fields.ToJson()}");
 
         return await Post(url,
             new FormUrlEncodedContent(fields.ToDictionary(pair => pair.Key, pair => pair.Value!.ToString())),

@@ -6,6 +6,7 @@ using System.CommandLine.Parsing;
 using A180.CoreLib.Kernel;
 using A180.CoreLib.Kernel.Extensions;
 using A180.CoreLib.Text;
+using A180.CoreLib.Text.Extensions;
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Commands.Extensions;
@@ -164,7 +165,7 @@ public static class Program
 
         Logger.Log("第四步");
         Logger.Log($"向所有用户发送消息，每{Global.Config.MessageTimeout}毫秒发送一次...");
-        Logger.LogColor($"消息内容：{AStrings.Elide(message, 10)}");
+        Logger.LogColor($"消息内容：{message.Elide(10)}");
 
         // return;
 
