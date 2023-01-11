@@ -13,7 +13,7 @@ public class CacheTask : BaseTask
     {
     }
 
-    public async Task<bool> Run(Action beforeSave = null)
+    public async Task<int> Run(Action beforeSave = null)
     {
         if (MessageTool.RecoveryMode && DataExists)
         {
@@ -26,13 +26,13 @@ public class CacheTask : BaseTask
             catch (Exception e)
             {
                 Logger.LogError($"读取日志失败：{e.Message}");
-                return false;
+                return -1;
             }
 
             if (string.IsNullOrEmpty(Data.KeyWord))
             {
                 Logger.LogWarn("日志中没有关键词，可能发生了错误，无法恢复");
-                return false;
+                return -1;
             }
 
             // 必须使用日志中的关键词
@@ -53,7 +53,7 @@ public class CacheTask : BaseTask
                 else
                 {
                     Logger.LogWarn("缺少消息内容");
-                    return false;
+                    return -1;
                 }
             }
         }
@@ -64,7 +64,7 @@ public class CacheTask : BaseTask
             if (string.IsNullOrEmpty(keyword))
             {
                 Logger.LogError("缺少关键词");
-                return false;
+                return -1;
             }
 
             // 保存关键词
@@ -88,7 +88,7 @@ public class CacheTask : BaseTask
             if (string.IsNullOrEmpty(Global.Config.Message))
             {
                 Logger.LogWarn("缺少消息内容");
-                return false;
+                return -1;
             }
 
             // 保存消息内容
@@ -103,6 +103,6 @@ public class CacheTask : BaseTask
             await SaveDataAsync(Data);
         }
 
-        return true;
+        return 0;
     }
 }

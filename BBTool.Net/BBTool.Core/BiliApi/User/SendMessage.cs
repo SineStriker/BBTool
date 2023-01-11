@@ -23,7 +23,7 @@ public class SendMessage : SimpleRequest
 
     public async Task<bool> Send(long senderId, long receiverId, string message, string cookie)
     {
-        string csrf = CookieUtil.GetCsrfToken(cookie);
+        string csrf = ApiUtil.GetCsrfToken(cookie);
         if (csrf == "")
         {
             return Fail<bool>("找不到 CSRF Token");
@@ -37,7 +37,7 @@ public class SendMessage : SimpleRequest
             { "msg[receiver_type]", 1 },
             { "msg[msg_type]", 1 },
             { "msg[msg_status]", 0 },
-            { "msg[dev_id]", Sys.GetDevId() },
+            { "msg[dev_id]", ApiUtil.GetDevId() },
             { "msg[timestamp]", DateTimeOffset.Now.ToUnixTimeSeconds() },
             { "msg[content]", "{\"content\":\"" + message + "\"}" },
             { "csrf_token", csrf },

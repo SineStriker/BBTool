@@ -52,10 +52,14 @@ public static class Program
 
     static async Task WorkRoutine(InvocationContext context)
     {
+        int ret;
+
         // 获取用户信息
         var task0 = new CheckUser();
-        if (!await task0.Run())
+        ret = await task0.Run();
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 
@@ -85,8 +89,10 @@ public static class Program
 
         // 前期缓存工作
         var task1 = new CacheTask(1);
-        if (!await task1.Run(initDirAction))
+        ret = await task1.Run(initDirAction);
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 
@@ -100,8 +106,10 @@ public static class Program
 
         // 搜索
         var task2 = new SearchTask(2);
-        if (!await task2.Run())
+        ret = await task2.Run();
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 
@@ -134,8 +142,10 @@ public static class Program
 
         // 发送消息
         var task3 = new BatchMessage(3);
-        if (!await task3.Run(user.Mid, users, message))
+        ret = await task3.Run(user.Mid, users, message);
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 

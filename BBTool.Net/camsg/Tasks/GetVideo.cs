@@ -16,7 +16,7 @@ public class GetVideo : BaseTask
     {
     }
 
-    public async Task<bool> Run(Action beforeSave = null)
+    public async Task<int> Run(Action beforeSave = null)
     {
         string vid = Global.VideoId;
 
@@ -31,7 +31,7 @@ public class GetVideo : BaseTask
             catch (Exception e)
             {
                 Logger.LogError($"读取日志失败：{e.Message}");
-                return false;
+                return -1;
             }
 
             // 若本次未指定消息内容
@@ -45,7 +45,7 @@ public class GetVideo : BaseTask
                 else
                 {
                     Logger.LogWarn("缺少消息内容");
-                    return false;
+                    return -1;
                 }
             }
         }
@@ -54,7 +54,7 @@ public class GetVideo : BaseTask
             if (string.IsNullOrEmpty(vid))
             {
                 Logger.LogError($"缺少视频id");
-                return false;
+                return -1;
             }
 
             Logger.Log("获取视频信息...");
@@ -67,7 +67,7 @@ public class GetVideo : BaseTask
                     if (info == null)
                     {
                         Logger.LogError($"获取视频信息失败：{api.ErrorMessage}");
-                        return false;
+                        return api.Code;
                     }
 
                     Logger.LogDebug($"AV号：{info.Avid}");
@@ -86,7 +86,7 @@ public class GetVideo : BaseTask
                     if (info == null)
                     {
                         Logger.LogError($"获取评论数失败：{api.ErrorMessage}");
-                        return false;
+                        return api.Code;
                     }
 
                     Logger.LogColor($"评论数：{info.Total}");
@@ -97,14 +97,14 @@ public class GetVideo : BaseTask
             else
             {
                 Logger.LogError("非法的视频id");
-                return false;
+                return -1;
             }
 
             // 检查是否有消息内容
             if (string.IsNullOrEmpty(Global.Config.Message))
             {
                 Logger.LogWarn("缺少消息内容");
-                return false;
+                return -1;
             }
 
             // 保存消息内容
@@ -119,6 +119,6 @@ public class GetVideo : BaseTask
             await SaveDataAsync(Data);
         }
 
-        return true;
+        return 0;
     }
 }

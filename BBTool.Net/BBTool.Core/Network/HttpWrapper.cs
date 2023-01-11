@@ -1,5 +1,4 @@
-﻿using A180.CoreLib.Text;
-using A180.CoreLib.Text.Extensions;
+﻿using A180.CoreLib.Text.Extensions;
 using A180.Network.Http;
 using BBDown.Core;
 

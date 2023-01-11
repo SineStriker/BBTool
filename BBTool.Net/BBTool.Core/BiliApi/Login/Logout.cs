@@ -9,7 +9,7 @@ public class Logout : SimpleRequest
 
     public async Task<bool> Send(string cookie)
     {
-        string csrf = CookieUtil.GetCsrfToken(cookie);
+        string csrf = ApiUtil.GetCsrfToken(cookie);
         if (csrf == "")
         {
             return Fail<bool>("找不到 CSRF Token");

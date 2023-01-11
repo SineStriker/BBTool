@@ -7,4 +7,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\A180.CommandLine\A180.CommandLine.csproj" />
+      <ProjectReference Include="..\A180.CoreLib\A180.CoreLib.csproj" />
+      <ProjectReference Include="..\A180.Network\A180.Network.csproj" />
+    </ItemGroup>
+
 </Project>

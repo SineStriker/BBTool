@@ -14,7 +14,7 @@ public class BatchMessage : BaseTask
     {
     }
 
-    public async Task<bool> Run(long sender, List<MidNamePair> receivers, string message)
+    public async Task<int> Run(long sender, List<MidNamePair> receivers, string message)
     {
         if (MessageTool.RecoveryMode && DataExists)
         {
@@ -27,10 +27,11 @@ public class BatchMessage : BaseTask
             catch (Exception e)
             {
                 Logger.LogError($"读取日志失败，错误信息：{e.Message}");
-                return false;
+                return -1;
             }
         }
 
+        int ret = 0;
         using (var guard = new LocalTaskGuard())
         {
             {
@@ -54,6 +55,7 @@ public class BatchMessage : BaseTask
                         if (api.Code != 0)
                         {
                             Logger.LogError($"获取最近消息失败：{api.ErrorMessage}");
+                            ret = api.Code;
                             break;
                         }
 
@@ -75,6 +77,7 @@ public class BatchMessage : BaseTask
                         {
                             // 必须中断的错误
                             Logger.LogError($"致命错误：{api.ErrorMessage}");
+                            ret = api.Code;
                             break;
                         }
 
@@ -82,6 +85,7 @@ public class BatchMessage : BaseTask
                         {
                             // 频率过高
                             Logger.LogError(api.ErrorMessage);
+                            ret = api.Code;
                             break;
                         }
 
@@ -113,10 +117,11 @@ public class BatchMessage : BaseTask
                     // 避免发送请求太快，设置延时
                     if (!guard.Sleep(skip ? MessageTool.Config.GetTimeout : MessageTool.Config.MessageTimeout))
                     {
+                        ret = -2;
                         break;
                     }
                 }
-                
+
                 Logger.LogColor($"总共发送给了{Data.SendCount}个用户");
 
                 // 保存日志
@@ -124,11 +129,11 @@ public class BatchMessage : BaseTask
 
                 if (i < n)
                 {
-                    return false;
+                    return ret == 0 ? -1 : ret;
                 }
             }
         }
 
-        return true;
+        return ret;
     }
 }

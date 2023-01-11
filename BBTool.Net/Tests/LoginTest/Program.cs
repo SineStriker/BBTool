@@ -23,7 +23,7 @@ public static class Program
             Logger.Log("测试登录");
             {
                 var task = new LoginTask();
-                if (!task.Run().Result)
+                if (task.Run().Result != 0)
                 {
                     return 0;
                 }

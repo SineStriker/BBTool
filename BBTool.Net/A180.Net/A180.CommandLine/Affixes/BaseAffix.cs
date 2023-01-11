@@ -33,13 +33,9 @@ public class BaseAffix
     }
 
     /// <summary>
-    /// 处理函数（如果设置的话）
+    /// 空处理函数
     /// </summary>
     /// <param name="context"></param>
-    public virtual async Task SimpleRoutine(InvocationContext context)
-    {
-    }
-
     public static async Task EmptyRoutine(InvocationContext context)
     {
     }

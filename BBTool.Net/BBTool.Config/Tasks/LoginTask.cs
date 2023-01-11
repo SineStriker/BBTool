@@ -22,14 +22,14 @@ public class LoginTask : BaseTask
 
     public string Data = "";
 
-    public async Task<bool> Run()
+    public async Task<int> Run()
     {
         string cookie = "";
 
         var qrcodeInfo = new FileInfo(QRCodePath);
 
         // 结束后删除二维码文件
-        var rmQRCode = () => 
+        var rmQRCode = () =>
         {
             if (qrcodeInfo.Exists)
             {
@@ -37,6 +37,7 @@ public class LoginTask : BaseTask
             }
         };
 
+        int ret = 0;
         using (var guard = new LocalTaskGuard(rmQRCode))
         {
             try
@@ -51,7 +52,7 @@ public class LoginTask : BaseTask
                     if (qrcode == null)
                     {
                         Logger.LogError(api.ErrorMessage);
-                        return false;
+                        return api.Code;
                     }
                 }
 
@@ -84,6 +85,7 @@ public class LoginTask : BaseTask
                     // 轮循间隔
                     if (!guard.Sleep(LoginPollTimeout, false))
                     {
+                        ret = 2;
                         break;
                     }
 
@@ -94,6 +96,7 @@ public class LoginTask : BaseTask
                         if (poll == null)
                         {
                             Logger.LogError(api.ErrorMessage);
+                            ret = api.Code == 0 ? -1 : api.Code;
                             break;
                         }
                     }
@@ -124,7 +127,7 @@ public class LoginTask : BaseTask
                             var cc = poll.Url;
 
                             // 扫码成功
-                            Logger.Log("登录成功: SESSDATA=" + CookieUtil.GetQueryString("SESSDATA", cc));
+                            Logger.Log("登录成功: SESSDATA=" + ApiUtil.GetQueryString("SESSDATA", cc));
 
                             //导出cookie
                             // File.WriteAllText(Path.Combine(APP_DIR, "BBDown.data"),
@@ -141,21 +144,24 @@ public class LoginTask : BaseTask
                             over = true;
                             break;
                     }
+
+                    ret = poll.Code;
                 }
             }
             catch (Exception e)
             {
                 Logger.LogError(e.Message);
+                ret = -1;
             }
         }
 
         if (string.IsNullOrEmpty(cookie))
         {
-            return false;
+            return -1;
         }
 
         Data = cookie;
 
-        return true;
+        return ret;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using BBDown.Core;
 using BBTool.Config.Tasks;
 
@@ -11,12 +12,14 @@ public class LoginCommand : Command
         this.SetHandler(Routine);
     }
 
-    private async Task Routine()
+    private async Task Routine(InvocationContext context)
     {
         var task = new LoginTask();
-        if (!await task.Run())
+        var ret = await task.Run();
+        if (ret != 0)
         {
             // 登录失败
+            context.ExitCode = ret;
             return;
         }
 

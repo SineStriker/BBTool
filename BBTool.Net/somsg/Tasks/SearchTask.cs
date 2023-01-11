@@ -16,7 +16,7 @@ public class SearchTask : BaseTask
     {
     }
 
-    public async Task<bool> Run()
+    public async Task<int> Run()
     {
         if (MessageTool.RecoveryMode && DataExists)
         {
@@ -29,20 +29,20 @@ public class SearchTask : BaseTask
             catch (Exception e)
             {
                 Logger.LogError($"读取日志失败：{e.Message}");
-                return false;
+                return -1;
             }
 
             if (Data.Finished)
             {
                 Logger.Log($"已获取完毕，跳过");
-                return true;
+                return 0;
             }
         }
 
         var keyword = Global.KeyWord;
         var order = (AppConfig.SortOrder)Global.Config.SortOrderNum;
 
-        bool failed = false;
+        int ret = 0;
         using (var guard = new LocalTaskGuard())
         {
             int page = Data.CurrentPage;
@@ -61,7 +61,7 @@ public class SearchTask : BaseTask
                 if (api.Code != 0 || res == null)
                 {
                     Logger.LogError($"获取失败：{api.ErrorMessage}");
-                    failed = true;
+                    ret = api.Code == 0 ? -1 : api.Code;
                     break;
                 }
 
@@ -87,7 +87,7 @@ public class SearchTask : BaseTask
                 // 避免发送请求太快，设置延时
                 if (!guard.Sleep(Global.Config.GetTimeout))
                 {
-                    failed = true;
+                    ret = -2;
                     break;
                 }
             }
@@ -95,6 +95,6 @@ public class SearchTask : BaseTask
 
         await SaveDataAsync(Data);
 
-        return !failed;
+        return ret;
     }
 }

@@ -17,7 +17,7 @@ public class CollectSub : BaseTask
     {
     }
 
-    public async Task<bool> Run(long avid, List<CommentInfo> rootComments)
+    public async Task<int> Run(long avid, List<CommentInfo> rootComments)
     {
         if (MessageTool.RecoveryMode && DataExists)
         {
@@ -30,17 +30,17 @@ public class CollectSub : BaseTask
             catch (Exception e)
             {
                 Logger.LogError($"读取日志失败，错误信息：{e.Message}");
-                return false;
+                return -1;
             }
 
             if (Data.Finished)
             {
                 Logger.Log($"已获取完毕，跳过");
-                return true;
+                return 0;
             }
         }
 
-        bool failed = false;
+        int ret = 0;
         using (var guard = new LocalTaskGuard())
         {
             int idx = 0;
@@ -80,7 +80,7 @@ public class CollectSub : BaseTask
                     if (comments == null || comments.Count == 0)
                     {
                         Logger.LogError($"获取失败：{api.ErrorMessage}");
-                        failed = true;
+                        ret = api.Code == 0 ? -1 : api.Code;
                         break;
                     }
 
@@ -94,7 +94,7 @@ public class CollectSub : BaseTask
                     // 避免发送请求太快，设置延时
                     if (!guard.Sleep(Global.Config.GetTimeout))
                     {
-                        failed = true;
+                        ret = -2;
                         break;
                     }
 
@@ -105,13 +105,13 @@ public class CollectSub : BaseTask
                     }
                 }
 
-                if (failed)
+                if (ret != 0)
                 {
                     break;
                 }
             }
 
-            if (!failed)
+            if (ret == 0)
             {
                 Data.Finished = true;
             }
@@ -120,6 +120,6 @@ public class CollectSub : BaseTask
         // 保存日志
         await SaveDataAsync(Data);
 
-        return !failed;
+        return ret;
     }
 }

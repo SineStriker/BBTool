@@ -53,10 +53,14 @@ public static class Program
 
     static async Task WorkRoutine(InvocationContext context)
     {
+        int ret;
+
         // 获取用户信息
         var task0 = new CheckUser();
-        if (!await task0.Run())
+        ret = await task0.Run();
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 
@@ -84,8 +88,10 @@ public static class Program
 
         // 获取视频内容
         var task1 = new GetVideo(1);
-        if (!await task1.Run(initDirAction))
+        ret = await task1.Run(initDirAction);
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 
@@ -104,8 +110,10 @@ public static class Program
 
         // 获取根评论区
         var task2 = new CollectRoot(2);
-        if (!await task2.Run(videoInfo.Avid, commentInfo.Root))
+        ret = await task2.Run(videoInfo.Avid, commentInfo.Root);
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 
@@ -120,8 +128,10 @@ public static class Program
 
         // 获取副评论区
         var task3 = new CollectSub(3);
-        if (!await task3.Run(videoInfo.Avid, rootComments))
+        ret = await task3.Run(videoInfo.Avid, rootComments);
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 
@@ -171,8 +181,10 @@ public static class Program
 
         // 发送消息
         var task4 = new BatchMessage(4);
-        if (!await task4.Run(user.Mid, users, message))
+        ret = await task4.Run(user.Mid, users, message);
+        if (ret != 0)
         {
+            context.ExitCode = ret;
             return;
         }
 

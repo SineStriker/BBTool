@@ -4,7 +4,7 @@ namespace A180.CommandLine.Midwares;
 
 public class TemplateMidware : BaseMidware
 {
-    public TemplateMidware(CommandLineBuilder builder) : base(builder)
+    internal TemplateMidware(CommandLineBuilder builder) : base(builder)
     {
     }
 
@@ -13,5 +13,5 @@ public class TemplateMidware : BaseMidware
         Work?.Invoke();
     }
 
-    protected internal Action Work { get; set; } = null;
+    internal Action Work { get; set; } = null;
 }

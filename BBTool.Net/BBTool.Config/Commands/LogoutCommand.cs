@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using BBDown.Core;
 using BBTool.Core.BiliApi.Login;
 
@@ -11,12 +12,13 @@ public class LogoutCommand : Command
         this.SetHandler(Routine);
     }
 
-    private async Task Routine()
+    private async Task Routine(InvocationContext context)
     {
         var info = new FileInfo(MessageTool.CookiePath);
         if (!info.Exists)
         {
             Logger.LogWarn("没有找到本地Cookie");
+            context.ExitCode = -1;
             return;
         }
 
@@ -25,6 +27,7 @@ public class LogoutCommand : Command
         if (api.Code != 0)
         {
             Logger.LogError(api.ErrorMessage);
+            context.ExitCode = api.Code;
             return;
         }
 
