@@ -9,31 +9,34 @@ namespace BBRsm.Daemon.Commands;
 public class ServerAffix : MessageAffix<AppConfig>
 {
     // 选项
-    public Option<string> KeyWord = new(new[] { "-k", "--keyword" }, "搜索关键词");
+    public readonly Option<string> KeyWord = new(new[] { "-k", "--keyword" }, "搜索关键词");
 
-    public Option<int> Partition =
+    public readonly Option<int> Partition =
         new(new[] { "-s", "--section" },
             $"分区号，默认值{(int)AppConfig.DefaultPartition}（{AppConfig.DefaultPartition.ToString()}）")
         {
             ArgumentHelpName = "tid",
         };
 
-    public Option<int> BlockTimeout = new("--block-timeout", $"指定高频发送消息账户的睡眠时间（毫秒），默认值{AppConfig.DefaultBlockTimeout}")
-    {
-        ArgumentHelpName = "timeout",
-    };
+    public readonly Option<int> BlockTimeout =
+        new("--block-timeout", $"指定高频发送消息账户的睡眠时间（毫秒），默认值{AppConfig.DefaultBlockTimeout}")
+        {
+            ArgumentHelpName = "timeout",
+        };
 
-    public Option<int> SearchTimeout = new("--search-timeout", $"指定两次执行搜索的时间间隔（毫秒），默认值{AppConfig.DefaultSearchTimeout}")
-    {
-        ArgumentHelpName = "timeout",
-    };
+    public readonly Option<int> SearchTimeout =
+        new("--search-timeout", $"指定两次执行搜索的时间间隔（毫秒），默认值{AppConfig.DefaultSearchTimeout}")
+        {
+            ArgumentHelpName = "timeout",
+        };
 
-    public Option<int> WaitTimeout = new("--wait-timeout", $"指定因先决条件不足而循环等待的时间（毫秒），默认值{AppConfig.DefaultWaitTimeout}")
-    {
-        ArgumentHelpName = "timeout",
-    };
+    public readonly Option<int> WaitTimeout =
+        new("--wait-timeout", $"指定因先决条件不足而循环等待的时间（毫秒），默认值{AppConfig.DefaultWaitTimeout}")
+        {
+            ArgumentHelpName = "timeout",
+        };
 
-    public Option<int> Port =
+    public readonly Option<int> Port =
         new(new[] { "-p", "--port" }, $"监听端口号，默认值{Global.ServerPort}")
         {
             ArgumentHelpName = "port",

@@ -8,7 +8,7 @@ public class QRCodeGen : SimpleRequest
 {
     public override string ApiPattern => "https://passport.bilibili.com/x/passport-login/web/qrcode/generate";
 
-    public async Task<GenerateResult> Send()
+    public async Task<GenerateResult?> Send()
     {
         return await GetData(obj => new GenerateResult
             {

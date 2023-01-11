@@ -8,8 +8,8 @@ namespace BBRsm.Daemon.Commands;
 public class RunCommand : Command
 {
     // 复用选项
-    public ServerAffix Message;
-    
+    public readonly ServerAffix Message;
+
     // 控制流转移对象
     private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;
 

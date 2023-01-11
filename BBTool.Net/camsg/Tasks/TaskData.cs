@@ -4,9 +4,9 @@ namespace Camsg.Tasks;
 
 public class TaskBaseInfo
 {
-    public VideoInfo VideoInfo { get; set; }
+    public VideoInfo VideoInfo { get; set; } = new();
 
-    public CommentCount CommentInfo { get; set; }
+    public CommentCount CommentInfo { get; set; } = new();
 
     public string SavedMessage { get; set; } = "";
 }

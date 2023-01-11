@@ -13,7 +13,7 @@ public class CacheTask : BaseTask
     {
     }
 
-    public async Task<int> Run(Action beforeSave = null)
+    public async Task<int> Run(Action? beforeSave = null)
     {
         if (MessageTool.RecoveryMode && DataExists)
         {
@@ -94,10 +94,7 @@ public class CacheTask : BaseTask
             // 保存消息内容
             Data.SavedMessage = Global.Config.Message;
 
-            if (beforeSave != null)
-            {
-                beforeSave.Invoke();
-            }
+            beforeSave?.Invoke();
 
             // 保存日志
             await SaveDataAsync(Data);

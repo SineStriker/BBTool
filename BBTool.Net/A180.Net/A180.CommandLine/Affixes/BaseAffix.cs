@@ -6,7 +6,7 @@ namespace A180.CommandLine.Affixes;
 
 public class BaseAffix
 {
-    public Command Command { get; } = null;
+    public Command Command { get; }
 
     /// <summary>
     /// 为 Command 设置

@@ -9,7 +9,7 @@ public class QRCodePoll : SimpleRequest
     public override string ApiPattern =>
         "https://passport.bilibili.com/x/passport-login/web/qrcode/poll?qrcode_key={0}";
 
-    public async Task<PollResult> Send(string key)
+    public async Task<PollResult?> Send(string key)
     {
         return await GetData(obj => new PollResult
         {

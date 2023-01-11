@@ -1,9 +1,7 @@
-﻿using A180.CoreLib.Text;
-using A180.CoreLib.Text.Extensions;
+﻿using A180.CoreLib.Text.Extensions;
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Tasks;
-using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.Search;
 
 namespace Somsg.Tasks;

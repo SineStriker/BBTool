@@ -52,10 +52,10 @@ public class BatchMessage : BaseTask
                         var api = new GetRecentTalk();
                         var msgList = await api.Send(mid, 20, MessageTool.Cookie);
 
-                        if (api.Code != 0)
+                        if (msgList == null)
                         {
                             Logger.LogError($"获取最近消息失败：{api.ErrorMessage}");
-                            ret = api.Code;
+                            ret = api.Code == 0 ? -1 : api.Code;
                             break;
                         }
 
@@ -92,7 +92,7 @@ public class BatchMessage : BaseTask
                         if (code > 0)
                         {
                             // 记录遇到错误的用户
-                            HashSet<long> list;
+                            HashSet<long>? list;
                             if (!Data.ErrorAttempts.TryGetValue(code, out list))
                             {
                                 list = new HashSet<long>();

@@ -6,7 +6,7 @@ public static class AStrings
 {
     public static string Elide(string s, int len)
     {
-        return s.Length <= len ? s : $"{s.Substring(0, len)}...";
+        return s.Length <= len ? s : $"{s[..len]}...";
     }
 
     public static string Pad(string s, int len)

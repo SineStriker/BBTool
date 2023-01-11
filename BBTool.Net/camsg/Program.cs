@@ -3,7 +3,6 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using A180.CoreLib.Kernel;
 using A180.CoreLib.Kernel.Extensions;
 using A180.CoreLib.Text;
 using A180.CoreLib.Text.Extensions;

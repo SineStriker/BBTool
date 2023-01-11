@@ -45,14 +45,14 @@ public class LoginTask : BaseTask
                 Logger.Log("获取登录地址...");
 
                 // 向服务器请求二维码
-                QRCode.GenerateResult qrcode;
+                QRCode.GenerateResult? qrcode;
                 {
                     var api = new QRCodeGen();
                     qrcode = await api.Send();
                     if (qrcode == null)
                     {
                         Logger.LogError(api.ErrorMessage);
-                        return api.Code;
+                        return api.Code == 0 ? -1 : api.Code;
                     }
                 }
 
@@ -89,7 +89,7 @@ public class LoginTask : BaseTask
                         break;
                     }
 
-                    QRCode.PollResult poll;
+                    QRCode.PollResult? poll;
                     {
                         var api = new QRCodePoll();
                         poll = await api.Send(qrcode.Key);

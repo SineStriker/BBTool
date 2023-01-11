@@ -1,11 +1,8 @@
-﻿using System.Text.Json;
-using A180.CoreLib.Collections;
-using A180.CoreLib.Kernel;
+﻿using A180.CoreLib.Collections;
 using A180.CoreLib.Kernel.Extensions;
 using A180.CoreLib.Text;
 using BBDown;
 using BBDown.Core;
-using BBTool.Config;
 
 namespace BBTool.Config.Tasks;
 
@@ -21,7 +18,7 @@ public class BaseTask
 
     public void RemoveData() => DataPath.RmFile();
 
-    private int _taskId = -1;
+    private int _taskId;
 
     public BaseTask(int tid = -1)
     {
@@ -54,7 +51,7 @@ public class BaseTask
 /// </summary>
 public class LocalTaskGuard : IDisposable
 {
-    public LocalTaskGuard(Action action = null)
+    public LocalTaskGuard(Action? action = null)
     {
         ActionAfterDispose = action;
 
@@ -64,13 +61,11 @@ public class LocalTaskGuard : IDisposable
     public void Dispose()
     {
         Console.CancelKeyPress -= InterruptHandler;
-        if (ActionAfterDispose != null)
-        {
-            ActionAfterDispose.Invoke();
-        }
+
+        ActionAfterDispose?.Invoke();
     }
 
-    protected Action ActionAfterDispose { get; }
+    protected Action? ActionAfterDispose { get; }
 
     /// <summary>
     /// 不管有没有全局中断都可继续
@@ -89,10 +84,11 @@ public class LocalTaskGuard : IDisposable
     /// 睡眠，直到超时或中断
     /// </summary>
     /// <param name="timeout">毫秒数</param>
+    /// <param name="showBar">是否显示进度条</param>
     /// <returns>超时返回true，中断返回false</returns>
     public bool Sleep(int timeout, bool showBar = true)
     {
-        ProgressBar bar = showBar ? new ProgressBar() : null;
+        var bar = showBar ? new ProgressBar() : null;
 
         var interrupt = false;
         var task = Task.Run(() =>
@@ -108,10 +104,7 @@ public class LocalTaskGuard : IDisposable
                         return false;
                     }
 
-                    if (bar != null)
-                    {
-                        bar.Report((double)i / num);
-                    }
+                    bar?.Report((double)i / num);
 
                     Thread.Sleep(100);
                 }
@@ -122,10 +115,7 @@ public class LocalTaskGuard : IDisposable
 
         task.Wait();
 
-        if (bar != null)
-        {
-            bar.Dispose();
-        }
+        bar?.Dispose();
 
         if (interrupt)
         {

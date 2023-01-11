@@ -4,7 +4,7 @@ namespace A180.CommandLine.Midwares;
 
 public class BaseMidware
 {
-    public CommandLineBuilder Builder { get; } = null;
+    public CommandLineBuilder Builder { get; }
 
     /// <summary>
     /// 为 CommandLineBuilder 设置

@@ -7,7 +7,7 @@ public static class ApiUtil
     /// <summary>
     /// 从 Cookie 中提取 CSRF Token
     /// </summary>
-    /// <param name="cookie">Cookie字符串</param>
+    /// <param name="url">Cookie字符串</param>
     /// <returns></returns>
     public static string GetCsrfToken(string url)
     {

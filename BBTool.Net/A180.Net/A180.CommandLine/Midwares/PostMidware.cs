@@ -8,7 +8,7 @@ namespace A180.CommandLine.Midwares;
 /// </summary>
 public class PostMidware : BaseMidware
 {
-    private bool _showHelpIfNoArgs;
+    private readonly bool _showHelpIfNoArgs;
 
     /// <summary>
     /// 构造函数

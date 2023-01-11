@@ -10,14 +10,14 @@ namespace Camsg.Commands;
 public class RecoverCommand : Command
 {
     // 复用选项
-    public MessageAffix<MessageConfig> Message;
+    public readonly MessageAffix<MessageConfig> Message;
 
     // 控制流转移对象
     private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;
 
     public RecoverCommand() : base("recover", "尝试恢复上一次任务")
     {
-        Message = new (this);
+        Message = new(this);
         Message.Setup();
 
         this.SetHandler(Routine);

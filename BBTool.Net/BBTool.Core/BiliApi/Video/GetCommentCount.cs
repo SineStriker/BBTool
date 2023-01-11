@@ -14,7 +14,7 @@ public class GetCommentCount : SimpleRequest
         return string.Format(ApiPattern, avid);
     }
 
-    public async Task<CommentCount> Send(long avid, string cookie = "")
+    public async Task<CommentCount?> Send(long avid, string cookie = "")
     {
         return await GetData(obj =>
                 new CommentCount

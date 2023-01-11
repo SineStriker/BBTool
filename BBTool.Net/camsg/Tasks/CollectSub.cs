@@ -1,5 +1,4 @@
-﻿using A180.CoreLib.Text;
-using A180.CoreLib.Text.Extensions;
+﻿using A180.CoreLib.Text.Extensions;
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Files;
@@ -58,7 +57,7 @@ public class CollectSub : BaseTask
                 // 如果有评论
                 var total = item.Count;
 
-                CommentProgress commentList;
+                CommentProgress? commentList;
                 if (!Data.SubComments.TryGetValue(item.Id, out commentList))
                 {
                     commentList = new CommentProgress();
@@ -77,25 +76,28 @@ public class CollectSub : BaseTask
                     var api = new GetSubComments();
                     var page = (int)((double)list.Count / MessageConfig.NumPerPage) + 1;
                     var comments = await api.Send(avid, item.Id, MessageConfig.NumPerPage, page);
-                    if (comments == null || comments.Count == 0)
+                    if (comments == null || api.Code != 0)
                     {
                         Logger.LogError($"获取失败：{api.ErrorMessage}");
-                        ret = api.Code == 0 ? -1 : api.Code;
+                        ret = api.Code;
                         break;
                     }
 
-                    list.AddRange(comments);
-
-                    var first = comments.First();
-                    Logger.Log(
-                        $"{idx}/{sum} {list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{first.Message.Replace("\n", " ").Elide(10)}"
-                    );
-
-                    // 避免发送请求太快，设置延时
-                    if (!guard.Sleep(Global.Config.GetTimeout))
+                    if (comments.Count > 0)
                     {
-                        ret = -2;
-                        break;
+                        list.AddRange(comments);
+
+                        var first = comments.First();
+                        Logger.Log(
+                            $"{idx}/{sum} {list.Count}/{total} 已获取{comments.Count}条评论，第一条为\"{first.UserName}\"发送的：{first.Message.Replace("\n", " ").Elide(10)}"
+                        );
+
+                        // 避免发送请求太快，设置延时
+                        if (!guard.Sleep(Global.Config.GetTimeout))
+                        {
+                            ret = -2;
+                            break;
+                        }
                     }
 
                     if (comments.Count < MessageConfig.NumPerPage)

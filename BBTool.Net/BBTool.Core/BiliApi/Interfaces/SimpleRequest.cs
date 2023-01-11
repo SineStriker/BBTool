@@ -11,7 +11,7 @@ public abstract class SimpleRequest : IBiliApi
 
     public string ErrorMessage => _errMsg;
 
-    protected T Fail<T>(string err)
+    protected T? Fail<T>(string err)
     {
         if (_code == 0)
         {
@@ -38,7 +38,7 @@ public abstract class SimpleRequest : IBiliApi
     /// <param name="checkCode">是否检查返回值是否为0</param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    protected async Task<T> GetData<T>(Func<JsonElement, T> parseData, Func<Task<string>> doRequest,
+    protected async Task<T?> GetData<T>(Func<JsonElement, T> parseData, Func<Task<string>> doRequest,
         bool ignoreNonJsonFormat = false,
         bool checkCode = true)
     {

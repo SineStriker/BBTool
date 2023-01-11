@@ -32,9 +32,9 @@ public class AppConfig : MessageConfig
         Scores,
     }
 
-    public static Partition DefaultPartition = Partition.喵星人;
+    public static readonly Partition DefaultPartition = Partition.喵星人;
 
-    public static SortOrder DefaultSortOrder = SortOrder.PubDate;
+    public static readonly SortOrder DefaultSortOrder = SortOrder.PubDate;
 
     /// <summary>
     /// 搜索分区

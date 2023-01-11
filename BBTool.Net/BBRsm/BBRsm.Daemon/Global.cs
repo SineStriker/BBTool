@@ -9,7 +9,7 @@ public static class Global
 
     public static int ServerPort = 14252;
 
-    public static HttpServer Server = null;
+    public static HttpServer? Server = null;
 
     public static AppConfig Config => (AppConfig)MessageTool.Config;
 }

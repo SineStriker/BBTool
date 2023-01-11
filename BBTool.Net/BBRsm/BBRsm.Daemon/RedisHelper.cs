@@ -1,5 +1,4 @@
-﻿using BBTool.Core;
-using StackExchange.Redis;
+﻿using StackExchange.Redis;
 
 namespace BBRsm.Daemon;
 
@@ -8,12 +7,12 @@ public static class RedisHelper
     private static readonly ConfigurationOptions ConfigurationOptions = ConfigurationOptions.Parse(Global.RedisUrl);
 
     private static readonly object Locker = new();
-    private static ConnectionMultiplexer _redisConn;
+    private static ConnectionMultiplexer? _redisConn = null;
 
     /// <summary>
     /// 单例获取
     /// </summary>
-    public static ConnectionMultiplexer Coonection
+    public static ConnectionMultiplexer Connection
     {
         get
         {

@@ -6,7 +6,7 @@ namespace BBTool.Config.Tasks;
 
 public class CheckUser : BaseTask
 {
-    public UserInfo Data { get; set; } = null;
+    public UserInfo Data { get; set; } = new();
 
     public async Task<int> Run()
     {
@@ -20,7 +20,7 @@ public class CheckUser : BaseTask
         // 检测用户是否登录
         Logger.Log("获取用户信息...");
 
-        UserInfo user;
+        UserInfo? user;
         {
             var api = new GetInfo();
             user = await api.Send(MessageTool.Cookie);
@@ -31,7 +31,7 @@ public class CheckUser : BaseTask
             }
         }
 
-        Logger.LogColor($"用户名：{user.UserName}");
+        Logger.LogColor($"用户名：{user!.UserName}");
         Logger.LogColor($"用户id：{user.Mid}");
 
         Data = user;

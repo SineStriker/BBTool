@@ -47,7 +47,7 @@ public class UserInfo
     /// </summary>
     public int CurrentLevel { get; set; }
 
-    public static bool IsNullOrOff(UserInfo info)
+    public static bool IsNullOrOff(UserInfo? info)
     {
         return info == null || !info.IsLogin;
     }

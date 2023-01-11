@@ -16,7 +16,7 @@ public class SearchVideo : SimpleRequest
         "http://api.bilibili.com/x/web-interface/search/type?search_type=video&keyword={0}&order={1}&tids={2}&page={3}" +
         "&duration=0&from_source=web_search";
 
-    public async Task<SearchVideoResult> Send(
+    public async Task<SearchVideoResult?> Send(
         string keyword,
         string order,
         int tid,

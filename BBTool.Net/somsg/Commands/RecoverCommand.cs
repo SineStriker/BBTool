@@ -10,7 +10,7 @@ namespace Somsg.Commands;
 public class RecoverCommand : Command
 {
     // 复用选项
-    public SearchAffix Message;
+    public readonly SearchAffix Message;
 
     // 控制流转移对象
     private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;

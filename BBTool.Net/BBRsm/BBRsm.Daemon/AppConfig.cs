@@ -33,15 +33,15 @@ public class AppConfig : MessageConfig
         Scores,
     }
 
-    public static Partition DefaultPartition = Partition.喵星人;
+    public static readonly Partition DefaultPartition = Partition.喵星人;
 
-    public static SortOrder DefaultSortOrder = SortOrder.PubDate;
+    public static readonly SortOrder DefaultSortOrder = SortOrder.PubDate;
 
-    public static long DefaultBlockTimeout = 864000000;
+    public static readonly long DefaultBlockTimeout = 864000000;
 
-    public static long DefaultSearchTimeout = 7200000;
+    public static readonly long DefaultSearchTimeout = 7200000;
 
-    public static int DefaultWaitTimeout = 1000;
+    public static readonly int DefaultWaitTimeout = 1000;
 
     /// <summary>
     /// 搜索分区

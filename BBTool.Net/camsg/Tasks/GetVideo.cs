@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using BBDown.Core;
+﻿using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Tasks;
 using BBTool.Core.BiliApi.Video;
@@ -16,7 +15,7 @@ public class GetVideo : BaseTask
     {
     }
 
-    public async Task<int> Run(Action beforeSave = null)
+    public async Task<int> Run(Action? beforeSave = null)
     {
         string vid = Global.VideoId;
 

@@ -10,7 +10,7 @@ public class GetInfo : SimpleRequest
 {
     public override string ApiPattern => "http://api.bilibili.com/x/web-interface/view?{0}id={1}";
 
-    public async Task<VideoInfo> Send(string vid, string cookie = "")
+    public async Task<VideoInfo?> Send(string vid, string cookie = "")
     {
         return await GetData(obj =>
             {

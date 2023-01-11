@@ -14,10 +14,10 @@ public class GenConfigCommand : Command
     public static readonly string DefaultOutput = MessageTool.AppName + "_template.json";
 
     // 命令
-    public Command Config = new("config", "生成配置文件");
+    public readonly Command Config = new("config", "生成配置文件");
 
     // 选项
-    public Option<FileInfo> Output =
+    public readonly Option<FileInfo> Output =
         new(new[] { "-o" }, () => new FileInfo(DefaultOutput), "指定输出路径")
         {
             ArgumentHelpName = "file",

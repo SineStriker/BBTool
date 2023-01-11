@@ -10,7 +10,7 @@ public class GetRootComments : SimpleRequest
     public override string ApiPattern =>
         "http://api.bilibili.com/x/v2/reply?type=1&oid={0}&ps={1}&pn={2}&sort=1&nohot=1";
 
-    public async Task<List<CommentInfo>> Send(long avid, int numPerPage, int page, string cookie = "")
+    public async Task<List<CommentInfo>?> Send(long avid, int numPerPage, int page, string cookie = "")
     {
         return await GetData(obj =>
             {

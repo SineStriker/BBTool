@@ -25,6 +25,6 @@ public class QRCode
         /// <summary>
         /// 若扫码成功返回的带 Session 的 URL
         /// </summary>
-        public string Url { get; set; }
+        public string Url { get; set; } = "";
     }
 }

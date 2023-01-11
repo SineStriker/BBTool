@@ -1,19 +1,14 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.CommandLine;
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using System.Net;
-using A180.CoreLib.Text;
-using A180.Network;
 using A180.Network.Http;
 using BBDown.Core;
-using BBRsm.Core;
 using BBRsm.Daemon.Commands;
 using BBTool.Config;
 using BBTool.Config.Commands.Extensions;
-using BBTool.Config.Files;
 
 namespace BBRsm.Daemon;
 
@@ -58,7 +53,7 @@ public static class Program
         Logger.Log("连接到Redis数据库...");
         try
         {
-            _ = RedisHelper.Coonection;
+            _ = RedisHelper.Connection;
         }
         catch (Exception e)
         {

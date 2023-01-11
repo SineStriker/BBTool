@@ -10,21 +10,21 @@ namespace Camsg.Commands;
 public class AppCommand : RootCommand
 {
     // 参数
-    public Argument<string> VideoId = new("vid", "视频av号或BV号");
+    public readonly Argument<string> VideoId = new("vid", "视频av号或BV号");
 
     // 命令
-    public LoginCommand Login = new();
+    public readonly LoginCommand Login = new();
 
-    public LogoutCommand Logout = new();
+    public readonly LogoutCommand Logout = new();
 
-    public LogStateCommand LogState = new();
+    public readonly LogStateCommand LogState = new();
 
-    public GenConfigCommand GenConfig = new();
+    public readonly GenConfigCommand GenConfig = new();
 
-    public RecoverCommand Recover = new();
+    public readonly RecoverCommand Recover = new();
 
     // 复用选项
-    public MessageAffix<MessageConfig> Message;
+    public readonly MessageAffix<MessageConfig> Message;
 
     // 控制流转移对象
     private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;

@@ -20,7 +20,7 @@ public static class MessageTool
     public static readonly string
         AppHistoryDir = Path.Combine(AppDataDir, AppName + "_history");
 
-    static public readonly string HistoryFileFormat = "yyyy-MM-dd_HH-mm-ss";
+    public static readonly string HistoryFileFormat = "yyyy-MM-dd_HH-mm-ss";
 
     public static string CookiePath = Path.Combine(AppDataDir, "bbtool_cookie.txt");
 
@@ -29,7 +29,7 @@ public static class MessageTool
     /// <summary>
     /// 全局配置
     /// </summary>
-    public static MessageConfig Config = null;
+    public static MessageConfig Config = new();
 
     /// <summary>
     /// 信号量

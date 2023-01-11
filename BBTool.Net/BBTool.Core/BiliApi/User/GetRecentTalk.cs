@@ -10,7 +10,7 @@ public class GetRecentTalk : SimpleRequest
     public override string ApiPattern =>
         "https://api.vc.bilibili.com/svr_sync/v1/svr_sync/fetch_session_msgs?session_type=1&talker_id={0}&size={1}";
 
-    public async Task<List<MessageInfo>> Send(long talkerId, int count, string cookie)
+    public async Task<List<MessageInfo>?> Send(long talkerId, int count, string cookie)
     {
         return await GetData(obj =>
             {

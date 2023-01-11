@@ -8,12 +8,12 @@ namespace BBRsm.Daemon.Commands;
 public class AppCommand : RootCommand
 {
     // 命令
-    public RunCommand Run = new();
+    public readonly RunCommand Run = new();
 
-    public MyGenCommand GenConfig = new();
+    public readonly MyGenCommand GenConfig = new();
 
     // 复用选项
-    public ServerAffix Message;
+    public readonly ServerAffix Message;
 
     // 控制流转移对象
     private Func<InvocationContext, Task> _routine = BaseAffix.EmptyRoutine;
@@ -42,7 +42,6 @@ public class AppCommand : RootCommand
         return;
 
         Message.ResolveResult(context);
-
         await _routine(context);
     }
 }

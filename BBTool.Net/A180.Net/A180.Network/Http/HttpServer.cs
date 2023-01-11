@@ -43,7 +43,7 @@ public class HttpServer
 
     public PredicateSet Cancelers { get; } = new();
 
-    private Func<HttpListenerRequest, HttpListenerResponse, Task<bool>> _handler = null;
+    private Func<HttpListenerRequest, HttpListenerResponse, Task<bool>>? _handler = null;
 
     private async Task HandleIncomingConnections()
     {
@@ -84,7 +84,7 @@ public class HttpServer
             Console.WriteLine(req.UserAgent);
             Console.WriteLine();
 
-            if (!await _handler(req, resp))
+            if (!await _handler!(req, resp))
             {
                 // The handler request to stop
                 break;
@@ -115,7 +115,7 @@ public class HttpServer
             bool runServer = true;
 
             // If `shutdown` url requested w/ POST, then shutdown the server after serving the page
-            if ((req.HttpMethod == "POST") && (req.Url.AbsolutePath == "/shutdown"))
+            if ((req.HttpMethod == "POST") && (req.Url!.AbsolutePath == "/shutdown"))
             {
                 Console.WriteLine("Shutdown requested");
                 runServer = false;

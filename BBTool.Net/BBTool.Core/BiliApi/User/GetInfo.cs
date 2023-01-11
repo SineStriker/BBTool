@@ -8,7 +8,7 @@ public class GetInfo : SimpleRequest
 {
     public override string ApiPattern => "https://api.bilibili.com/x/web-interface/nav";
 
-    public async Task<UserInfo> Send(string cookie = "")
+    public async Task<UserInfo?> Send(string cookie = "")
     {
         return await GetData(obj =>
                 new UserInfo
