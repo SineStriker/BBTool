@@ -31,6 +31,7 @@ public class GenConfigCommand : Command
 
         Config.SetHandler(ConfigRoutine);
 
+        // 默认生成配置文件
         this.SetHandler(ConfigRoutine);
     }
 

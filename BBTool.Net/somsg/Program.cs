@@ -95,6 +95,32 @@ public static class Program
             return;
         }
 
+        // 检查是否存在历史任务
+        var preUserIds = new HashSet<long>();
+        {
+            var files = new DirectoryInfo(MessageTool.AppHistoryDir).GetFiles(".", SearchOption.AllDirectories);
+            foreach (var info in files)
+            {
+                try
+                {
+                    var history = await AJson.LoadAsync<History>(info.FullName);
+                    foreach (var id in history.Users)
+                    {
+                        preUserIds.Add(id);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarn($"读取任务日志\"{info.Name}\"失败");
+                }
+            }
+
+            if (files.Any())
+            {
+                Logger.Log($"已读取所有任务日志，已排除{preUserIds.Count}个用户");
+            }
+        }
+
         string message = Global.Config.Message;
 
         Console.WriteLine();
@@ -118,17 +144,26 @@ public static class Program
         List<MidNamePair> users;
         {
             var userMap = new Dictionary<long, MidNamePair>();
-            foreach (var item in searchResult.Videos)
+
+            var addUser = (VideoInfo info) =>
             {
-                if (!userMap.ContainsKey(item.Mid))
+                if (preUserIds.Contains(info.Mid))
                 {
-                    userMap.Add(item.Mid, new(item.Mid, item.UserName));
+                    Logger.LogDebug($"跳过曾经发送过的用户：{info.Mid}");
+                    return;
+                }
+
+                if (!userMap.ContainsKey(info.Mid))
+                {
+                    userMap.Add(info.Mid, new(info.Mid, info.UserName));
                 }
                 else
                 {
-                    Logger.LogDebug($"跳过重复用户：{item.Mid}");
+                    Logger.LogDebug($"跳过重复用户：{info.Mid}");
                 }
-            }
+            };
+
+            searchResult.Videos.ForEach(addUser);
 
             users = userMap.Values.ToList();
         }

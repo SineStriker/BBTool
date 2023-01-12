@@ -13,5 +13,5 @@ public class TemplateMidware : BaseMidware
         Work?.Invoke();
     }
 
-    internal Action? Work { get; set; } = null;
+    internal Action? Work { get; set; }
 }

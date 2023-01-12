@@ -3,6 +3,7 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using A180.CoreLib.Collections.Extensions;
 using A180.CoreLib.Kernel.Extensions;
 using A180.CoreLib.Text;
 using A180.CoreLib.Text.Extensions;
@@ -94,6 +95,32 @@ public static class Program
             return;
         }
 
+        // 检查是否存在历史任务
+        var preUserIds = new HashSet<long>();
+        {
+            var files = new DirectoryInfo(MessageTool.AppHistoryDir).GetFiles(".", SearchOption.AllDirectories);
+            foreach (var info in files)
+            {
+                try
+                {
+                    var history = await AJson.LoadAsync<History>(info.FullName);
+                    foreach (var id in history.Users)
+                    {
+                        preUserIds.Add(id);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogWarn($"读取任务日志\"{info.Name}\"失败");
+                }
+            }
+
+            if (files.Any())
+            {
+                Logger.Log($"已读取所有任务日志，已排除{preUserIds.Count}个用户");
+            }
+        }
+
         var videoInfo = task1.Data.VideoInfo;
         var commentInfo = task1.Data.CommentInfo;
         string message = Global.Config.Message;
@@ -140,32 +167,27 @@ public static class Program
         List<MidNamePair> users;
         {
             var userMap = new Dictionary<long, MidNamePair>();
-            foreach (var item in rootComments)
+
+            var addUser = (CommentInfo info) =>
             {
-                if (!userMap.ContainsKey(item.Mid))
+                if (preUserIds.Contains(info.Mid))
                 {
-                    userMap.Add(item.Mid, new(item.Mid, item.UserName));
+                    Logger.LogDebug($"跳过曾经发送过的用户：{info.Mid}");
+                    return;
+                }
+
+                if (!userMap.ContainsKey(info.Mid))
+                {
+                    userMap.Add(info.Mid, new(info.Mid, info.UserName));
                 }
                 else
                 {
-                    Logger.LogDebug($"跳过重复用户：{item.Mid}");
+                    Logger.LogDebug($"跳过重复用户：{info.Mid}");
                 }
-            }
+            };
 
-            foreach (var item in subCommands)
-            {
-                foreach (var subitem in item.Value.Comments)
-                {
-                    if (!userMap.ContainsKey(subitem.Mid))
-                    {
-                        userMap.Add(subitem.Mid, new(subitem.Mid, subitem.UserName));
-                    }
-                    else
-                    {
-                        Logger.LogDebug($"跳过重复用户：{subitem.Mid}");
-                    }
-                }
-            }
+            rootComments.ForEach(addUser);
+            subCommands.ForEach(item => { item.Value.Comments.ForEach(addUser); });
 
             users = userMap.Values.ToList();
         }
