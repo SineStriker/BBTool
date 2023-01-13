@@ -1,39 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
 using BBTool.Config.Files;
+using BBTool.Core.BiliApi.Codes;
 
 namespace BBRsm.Daemon;
 
 public class AppConfig : MessageConfig
 {
-    public enum Partition
-    {
-        动物圈 = 217,
-        喵星人 = 218,
-    }
-
-    public enum SortOrder
-    {
-        [Description("综合排序")] //
-        TotalRank,
-
-        [Description("最多点击")] //
-        Click,
-
-        [Description("最新发布")] //
-        PubDate,
-
-        [Description("最多弹幕")] //
-        DM,
-
-        [Description("最多收藏")] //
-        STOW,
-
-        [Description("最多评论")] //
-        Scores,
-    }
-
-    public static readonly Partition DefaultPartition = Partition.喵星人;
+    public static readonly VideoSection DefaultPartition = VideoSection.喵星人;
 
     public static readonly SortOrder DefaultSortOrder = SortOrder.PubDate;
 
@@ -42,6 +16,11 @@ public class AppConfig : MessageConfig
     public static readonly long DefaultSearchTimeout = 7200000;
 
     public static readonly int DefaultWaitTimeout = 1000;
+
+    /// <summary>
+    /// 搜索关键词
+    /// </summary>
+    public string KeyWord { get; set; } = "";
 
     /// <summary>
     /// 搜索分区

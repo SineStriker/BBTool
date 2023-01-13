@@ -32,6 +32,7 @@ public class SearchVideo : SimpleRequest
                     NumResults = obj.GetProperty("numResults").GetInt32(),
                 };
 
+
                 if (res.NumResults > 0 && obj.TryGetProperty("result", out var result))
                 {
                     res.Videos = result.EnumerateArray().Select(

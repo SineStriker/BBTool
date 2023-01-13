@@ -9,15 +9,19 @@ public static class AJson
 {
     public static class Options
     {
-        public static JsonSerializerOptions Unicode =>
-            new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All) };
+        public static JsonSerializerOptions Unicode => new()
+        {
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+        };
 
-        public static JsonSerializerOptions UnicodeIndented =>
-            new() { Encoder = JavaScriptEncoder.Create(UnicodeRanges.All), WriteIndented = true, };
+        public static JsonSerializerOptions UnicodeIndented => new()
+        {
+            Encoder = JavaScriptEncoder.Create(UnicodeRanges.All), WriteIndented = true,
+        };
 
         public static JsonSerializerOptions GetUnicode(bool indented = false)
         {
-            return indented ? Unicode : UnicodeIndented;
+            return indented ? UnicodeIndented : Unicode;
         }
     }
 

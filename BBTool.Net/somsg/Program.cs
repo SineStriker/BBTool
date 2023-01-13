@@ -3,6 +3,7 @@
 using System.CommandLine.Builder;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using A180.CommandLine.Midwares.Extensions;
 using A180.CoreLib.Kernel.Extensions;
 using A180.CoreLib.Text;
 using A180.CoreLib.Text.Extensions;
@@ -145,11 +146,15 @@ public static class Program
         {
             var userMap = new Dictionary<long, MidNamePair>();
 
+            int a = 0;
+            int b = 0;
+
             var addUser = (VideoInfo info) =>
             {
                 if (preUserIds.Contains(info.Mid))
                 {
                     Logger.LogDebug($"跳过曾经发送过的用户：{info.Mid}");
+                    a++;
                     return;
                 }
 
@@ -160,12 +165,15 @@ public static class Program
                 else
                 {
                     Logger.LogDebug($"跳过重复用户：{info.Mid}");
+                    b++;
                 }
             };
 
             searchResult.Videos.ForEach(addUser);
 
             users = userMap.Values.ToList();
+            
+            Logger.Log($"已跳过曾经用户{a}个，本次重复用户{b}个");
         }
 
         Console.WriteLine();

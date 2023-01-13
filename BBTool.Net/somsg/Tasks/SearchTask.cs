@@ -2,6 +2,7 @@
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Tasks;
+using BBTool.Core.BiliApi.Codes;
 using BBTool.Core.BiliApi.Search;
 
 namespace Somsg.Tasks;
@@ -38,7 +39,7 @@ public class SearchTask : BaseTask
         }
 
         var keyword = Global.KeyWord;
-        var order = (AppConfig.SortOrder)Global.Config.SortOrderNum;
+        var order = (SortOrder)Global.Config.SortOrderNum;
 
         int ret = 0;
         using (var guard = new LocalTaskGuard())

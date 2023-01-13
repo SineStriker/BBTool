@@ -2,6 +2,7 @@
 using BBDown.Core;
 using BBTool.Config;
 using BBTool.Config.Tasks;
+using BBTool.Core.BiliApi.Codes;
 
 namespace Somsg.Tasks;
 
@@ -60,7 +61,7 @@ public class CacheTask : BaseTask
         else
         {
             var keyword = Global.KeyWord;
-            AppConfig.SortOrder order = AppConfig.DefaultSortOrder;
+            SortOrder order = AppConfig.DefaultSortOrder;
             if (string.IsNullOrEmpty(keyword))
             {
                 Logger.LogError("缺少关键词");
@@ -71,9 +72,9 @@ public class CacheTask : BaseTask
             Data.KeyWord = keyword;
 
             // 搜索方式检查
-            if (Enum.IsDefined(typeof(AppConfig.SortOrder), Global.Config.SortOrderNum))
+            if (Enum.IsDefined(typeof(SortOrder), Global.Config.SortOrderNum))
             {
-                order = (AppConfig.SortOrder)Global.Config.SortOrderNum;
+                order = (SortOrder)Global.Config.SortOrderNum;
             }
             else
             {

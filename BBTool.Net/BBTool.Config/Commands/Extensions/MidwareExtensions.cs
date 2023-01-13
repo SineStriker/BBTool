@@ -7,9 +7,9 @@ namespace BBTool.Config.Commands.Extensions;
 
 public static class MidwareExtensions
 {
-    public static CommandLineBuilder AddGlobal(this CommandLineBuilder builder)
+    public static CommandLineBuilder AddGlobal(this CommandLineBuilder builder, Option<bool>? opt = null)
     {
-        var option = new Option<bool>("--debug", "调试模式");
+        var option = opt ?? new Option<bool>("--debug", "调试模式");
         return OptionMidware<bool>.CreateGlobal(builder, option,
             (hasOption, optionHandler) =>
             {
@@ -24,15 +24,15 @@ public static class MidwareExtensions
         ).Setuped();
     }
 
-    public static CommandLineBuilder AddCookiePath(this CommandLineBuilder builder)
+    public static CommandLineBuilder AddCookiePath(this CommandLineBuilder builder, Option<FileInfo>? opt = null)
     {
-        var option =
-            new Option<FileInfo>("--cookie",
-                () => new FileInfo(MessageTool.CookiePath.FileName()), "设置Cookie路径"
-            )
-            {
-                ArgumentHelpName = "file",
-            };
+        var option = opt ??
+                     new Option<FileInfo>("--cookie",
+                         () => new FileInfo(MessageTool.CookiePath.FileName()), "设置Cookie路径"
+                     )
+                     {
+                         ArgumentHelpName = "file",
+                     };
 
         return OptionMidware<FileInfo>.CreateGlobal(builder, option,
             (hasOption, optionHandler) =>
@@ -53,10 +53,5 @@ public static class MidwareExtensions
                 return true;
             }
         ).Setuped();
-    }
-
-    public static CommandLineBuilder AddPost(this CommandLineBuilder builder)
-    {
-        return new PostMidware(builder).Setuped();
     }
 }

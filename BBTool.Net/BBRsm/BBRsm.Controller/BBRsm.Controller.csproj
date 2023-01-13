@@ -9,9 +9,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\BBTool.Config\BBTool.Config.csproj" />
       <ProjectReference Include="..\..\BBTool.Core\BBTool.Core.csproj" />
       <ProjectReference Include="..\BBRsm.Core\BBRsm.Core.csproj" />
-      <ProjectReference Include="..\BBRsm.Daemon\BBRsm.Daemon.csproj" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
+using BBRsm.Core;
 using BBTool.Config;
 using BBTool.Config.Commands.Affixes;
 
@@ -18,13 +19,13 @@ public class ServerAffix : MessageAffix<AppConfig>
             ArgumentHelpName = "tid",
         };
 
-    public readonly Option<int> BlockTimeout =
+    public readonly Option<long> BlockTimeout =
         new("--block-timeout", $"指定高频发送消息账户的睡眠时间（毫秒），默认值{AppConfig.DefaultBlockTimeout}")
         {
             ArgumentHelpName = "timeout",
         };
 
-    public readonly Option<int> SearchTimeout =
+    public readonly Option<long> SearchTimeout =
         new("--search-timeout", $"指定两次执行搜索的时间间隔（毫秒），默认值{AppConfig.DefaultSearchTimeout}")
         {
             ArgumentHelpName = "timeout",
@@ -37,7 +38,7 @@ public class ServerAffix : MessageAffix<AppConfig>
         };
 
     public readonly Option<int> Port =
-        new(new[] { "-p", "--port" }, $"监听端口号，默认值{Global.ServerPort}")
+        new(new[] { "-p", "--port" }, $"监听端口号，默认值{Rsm.ServerPort}")
         {
             ArgumentHelpName = "port",
         };
@@ -67,6 +68,11 @@ public class ServerAffix : MessageAffix<AppConfig>
 
         var res = context.ParseResult;
 
+        if (res.HasOption(KeyWord) && !UseConfigFile)
+        {
+            Global.Config.KeyWord = res.GetValueForOption(KeyWord)!;
+        }
+
         if (res.HasOption(Partition) && !UseConfigFile)
         {
             Global.Config.PartitionNum = res.GetValueForOption(Partition);
@@ -89,7 +95,7 @@ public class ServerAffix : MessageAffix<AppConfig>
 
         if (res.HasOption(Port))
         {
-            Global.ServerPort = res.GetValueForOption(Port);
+            Rsm.ServerPort = res.GetValueForOption(Port);
         }
     }
 }

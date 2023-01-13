@@ -28,7 +28,7 @@ public static class Http
         using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
         {
             Stream stream = response.GetResponseStream();
-            using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
+            using (var streamReader = new StreamReader(stream, Encoding.UTF8))
             {
                 source = streamReader.ReadToEnd();
             }
@@ -67,7 +67,7 @@ public static class Http
         using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
         {
             Stream stream = response.GetResponseStream();
-            using (StreamReader streamReader = new StreamReader(stream, Encoding.UTF8))
+            using (var streamReader = new StreamReader(stream, Encoding.UTF8))
             {
                 source = streamReader.ReadToEnd();
             }

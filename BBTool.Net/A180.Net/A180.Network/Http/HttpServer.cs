@@ -1,4 +1,5 @@
-﻿using A180.CoreLib.Collections;
+﻿using System.Diagnostics.CodeAnalysis;
+using A180.CoreLib.Collections;
 
 namespace A180.Network.Http;
 
@@ -10,6 +11,8 @@ using System.Threading.Tasks;
 // https://gist.github.com/define-private-public/d05bc52dd0bed1c4699d49e2737e80e7
 public class HttpServer
 {
+    public static bool DisableDebug = false;
+
     public HttpServer(string url)
     {
         Url = url;
@@ -26,7 +29,7 @@ public class HttpServer
     /// 返回true继续监听，返回false结束监听
     /// </summary>
     /// <param name="handler"></param>
-    public async Task Start(Func<HttpListenerRequest, HttpListenerResponse, Task<bool>> handler)
+    public async Task Start([NotNull] Func<HttpListenerRequest, HttpListenerResponse, Task<bool>> handler)
     {
         _handler = handler;
 
@@ -76,13 +79,16 @@ public class HttpServer
             HttpListenerRequest req = ctx.Request;
             HttpListenerResponse resp = ctx.Response;
 
-            // Print out some info about the request
-            Console.WriteLine("Request #: {0}", ++RequestCount);
-            Console.WriteLine(req.Url!.ToString());
-            Console.WriteLine(req.HttpMethod);
-            Console.WriteLine(req.UserHostName);
-            Console.WriteLine(req.UserAgent);
-            Console.WriteLine();
+            if (!DisableDebug)
+            {
+                // Print out some info about the request
+                Console.WriteLine("Request #: {0}", ++RequestCount);
+                Console.WriteLine(req.Url!.ToString());
+                Console.WriteLine(req.HttpMethod);
+                Console.WriteLine(req.UserHostName);
+                Console.WriteLine(req.UserAgent);
+                Console.WriteLine();
+            }
 
             if (!await _handler!(req, resp))
             {
