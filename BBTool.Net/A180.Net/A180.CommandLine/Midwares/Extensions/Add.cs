@@ -2,7 +2,7 @@
 
 namespace A180.CommandLine.Midwares.Extensions;
 
-public static class Init
+public static class Add
 {
     public static CommandLineBuilder AddPost(this CommandLineBuilder builder)
     {

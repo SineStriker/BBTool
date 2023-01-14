@@ -1,4 +1,9 @@
 ﻿using System.CommandLine;
+using System.CommandLine.Invocation;
+using A180.CoreLib.Text;
+using A180.CoreLib.Text.Extensions;
+using BBRsm.Core.FuncTemplates;
+using BBRsm.Core.RPC;
 
 namespace BBRsm.Controller.Commands;
 
@@ -27,7 +32,7 @@ public class ShowCommand : Command
     public ShowCommand() : base("show", "显示指定的数据表")
     {
         BlackList.Add(UserId);
-        
+
         Add(Users);
         Add(Active);
         Add(Blocked);
@@ -36,7 +41,83 @@ public class ShowCommand : Command
         Add(Videos);
         Add(Fails);
         Add(BlackList);
-        
+
+        Users.SetHandler(UserCommand.ListRoutine);
+        Active.SetHandler(UserRoutine);
+        Blocked.SetHandler(UserRoutine);
+        Expired.SetHandler(UserRoutine);
+        SentUsers.SetHandler(UserRoutine);
+        Videos.SetHandler(VideosRoutine);
+        Fails.SetHandler(FailsRoutine);
+        BlackList.SetHandler(BlackListRoutine);
+
         AddGlobalOption(Verbose);
     }
+
+    private async Task UserRoutine(InvocationContext context)
+    {
+        var res = context.ParseResult;
+        var cmd = res.CommandResult.Command;
+
+        RUser.ListRequest obj;
+        if (cmd == Active)
+        {
+            obj = new RUser.ActiveListRequest();
+        }
+        else if (cmd == Blocked)
+        {
+            obj = new RUser.BlockedListRequest();
+        }
+        else if (cmd == Expired)
+        {
+            obj = new RUser.ExpiredListRequest();
+        }
+        else if (cmd == SentUsers)
+        {
+            obj = new RUser.ReceiversListRequest();
+        }
+        else
+        {
+            throw new CommandLineConfigurationException("非法的命令");
+        }
+
+        await UserCommand.SendListRequest(obj);
+    }
+
+    private async Task VideosRoutine(InvocationContext context)
+    {
+        var res = context.ParseResult;
+    }
+
+    private async Task FailsRoutine(InvocationContext context)
+    {
+        var res = context.ParseResult;
+    }
+
+    private async Task BlackListRoutine(InvocationContext context)
+    {
+        var res = context.ParseResult;
+
+        var obj = new RUser.HostileListRequest
+        {
+            MidRelated = res.GetValueForArgument(UserId)
+        };
+
+        await UserCommand.SendListRequest(obj);
+    }
+
+    // private async Task CommonRoutine(InvocationContext context)
+    // {
+    //     var res = context.ParseResult;
+    //     var obj = new RShow.Request
+    //     {
+    //         Key = res.CommandResult.Command.Name,
+    //     };
+    //
+    //     await ClientSend.Post(obj, resp =>
+    //     {
+    //         var respObj = resp.FromJson<RShow.Response>();
+    //         AStdout.Debug(respObj.Value);
+    //     });
+    // }
 }

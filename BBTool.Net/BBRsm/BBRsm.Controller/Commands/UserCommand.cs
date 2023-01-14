@@ -111,10 +111,9 @@ public class UserCommand : Command
         AStdout.Warning("缺少命令");
     }
 
-    public static async Task ListRoutine(InvocationContext context)
+    public static async Task SendListRequest(RUser.ListRequest req)
     {
-        var obj = new RUser.ListRequest();
-        await ClientSend.Post(obj, resp =>
+        await ClientSend.Post(req, resp =>
         {
             var respObj = resp.FromJson<RUser.ListResponse>();
             if (respObj.Users.Count == 0)
@@ -140,5 +139,10 @@ public class UserCommand : Command
                 ATable.ShowTable(header, rows, new List<int> { 5, 10, 10, 5 }, AStrings.AlignOption.Center);
             }
         });
+    }
+
+    public static async Task ListRoutine(InvocationContext context)
+    {
+        await SendListRequest(new RUser.ListRequest());
     }
 }

@@ -37,7 +37,7 @@ public static class UserHandler
             Global.Accounts.Add(user!.Mid, userAndCookie);
 
             // 存数据库
-            var db = RedisHelper.Connection.GetDatabase();
+            var db = RedisHelper.Database;
             db.StringSet(RedisHelper.Keys.Accounts + "/" + user.Mid, userAndCookie.ToJson());
         }
 
@@ -74,7 +74,7 @@ public static class UserHandler
                 Global.Accounts.Remove(userId);
 
                 // 删数据库
-                var db = RedisHelper.Connection.GetDatabase();
+                var db = RedisHelper.Database;
                 db.KeyDelete(RedisHelper.Keys.Accounts + "/" + user.Mid);
             }
         }

@@ -86,7 +86,7 @@ public class LocalTaskGuard : IDisposable
     /// <param name="timeout">毫秒数</param>
     /// <param name="showBar">是否显示进度条</param>
     /// <returns>超时返回true，中断返回false</returns>
-    public bool Sleep(int timeout, bool showBar = true)
+    public bool Sleep(long timeout, bool showBar = true)
     {
         var bar = showBar ? new ProgressBar() : null;
 
@@ -95,7 +95,7 @@ public class LocalTaskGuard : IDisposable
             {
                 var num = timeout / 100;
                 // 避免发送请求太快，设置延时
-                for (int i = 0; i < num; ++i)
+                for (long i = 0; i < num; ++i)
                 {
                     // 判断是否中断
                     if (LocalInterrupt != 0 || MessageTool.Interrupt != 0 || Cancelers.Yes)

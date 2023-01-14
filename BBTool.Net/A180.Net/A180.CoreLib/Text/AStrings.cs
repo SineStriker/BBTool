@@ -1,5 +1,4 @@
-﻿using System.Text;
-using A180.CoreLib.Text.Extensions;
+﻿using A180.CoreLib.Text.Extensions;
 
 namespace A180.CoreLib.Text;
 

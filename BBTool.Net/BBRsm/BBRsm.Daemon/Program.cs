@@ -16,7 +16,6 @@ using BBRsm.Daemon.Commands;
 using BBRsm.Daemon.HttpHandlers;
 using BBTool.Config;
 using BBTool.Config.Commands.Extensions;
-using StackExchange.Redis;
 
 namespace BBRsm.Daemon;
 
@@ -96,13 +95,13 @@ public static class Program
             }
 
             // 恢复已发送用户
-            var users = server.Keys(1, $"{RedisHelper.Keys.SentUsers}\\/?*");
-            foreach (var item in users)
-            {
-                var s = db.StringGet(item);
-                var mid = long.Parse(s.ToString());
-                Global.SentUsers.Add(mid);
-            }
+            // var users = server.Keys(1, $"{RedisHelper.Keys.SentUsers}\\/?*");
+            // foreach (var item in users)
+            // {
+            //     var s = db.StringGet(item);
+            //     var mid = long.Parse(s.ToString());
+            //     Global.SentUsers.Add(mid);
+            // }
         }
 
         // 添加中断
@@ -179,6 +178,26 @@ public static class Program
 
                 case "user-list":
                     respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "user-active":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "user-blocked":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "user-expired":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "user-receivers":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "user-blacklist":
+                    // respData = await UserHandler.ListRespond(content);
                     break;
 
                 default:

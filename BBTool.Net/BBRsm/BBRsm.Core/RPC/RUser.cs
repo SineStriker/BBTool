@@ -36,7 +36,34 @@ public static class RUser
 
     public class ListRequest : IRequest
     {
-        public string Command { get; set; } = "user-list";
+        public virtual string Command { get; set; } = "user-list";
+
+        public long MidRelated { get; set; } = 0;
+    }
+
+    public class ActiveListRequest : ListRequest
+    {
+        public override string Command { get; set; } = "user-active";
+    }
+
+    public class BlockedListRequest : ListRequest
+    {
+        public override string Command { get; set; } = "user-blocked";
+    }
+
+    public class ExpiredListRequest : ListRequest
+    {
+        public override string Command { get; set; } = "user-expired";
+    }
+
+    public class ReceiversListRequest : ListRequest
+    {
+        public override string Command { get; set; } = "user-receivers";
+    }
+
+    public class HostileListRequest : ListRequest
+    {
+        public override string Command { get; set; } = "user-blacklist";
     }
 
     public class ListResponse : IResponse

@@ -19,8 +19,4 @@
       <ProjectReference Include="..\BBRsm.Core\BBRsm.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Tasks" />
-    </ItemGroup>
-
 </Project>

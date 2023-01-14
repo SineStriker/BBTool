@@ -67,7 +67,7 @@ public class SearchTask : BaseTask
                 // 获取到的总数为 0 或没有获取到任何信息，则结束
                 if (res.NumPages == 0 || res.Videos.Count == 0)
                 {
-                    Logger.LogError($"当前页数超过上限，结束");
+                    Logger.LogWarn($"当前页数超过上限，结束");
                     Data.Finished = true;
                     break;
                 }

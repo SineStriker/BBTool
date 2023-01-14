@@ -9,18 +9,6 @@ public class SendMessage : SimpleRequest
 {
     public override string ApiPattern => "https://api.vc.bilibili.com/web_im/v1/web_im/send_msg";
 
-    public enum ErrorCode
-    {
-        [Description("对陌生人最多主动发送一条私信")] //
-        StrangerLimit = 21045,
-
-        [Description("发送信息频率过高")] //
-        TooFrequent = 21046,
-
-        [Description("因对方黑名单设置，无法发送私信")] //
-        BlackList = 25003,
-    }
-
     public async Task<bool> Send(long senderId, long receiverId, string message, string cookie)
     {
         string csrf = ApiUtil.GetCsrfToken(cookie);
