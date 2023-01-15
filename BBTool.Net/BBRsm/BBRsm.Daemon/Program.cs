@@ -176,6 +176,10 @@ public static class Program
                     respData = await UserHandler.RemoveRespond(content);
                     break;
 
+                case "user-clear":
+                    respData = await UserHandler.ClearRespond(content);
+                    break;
+
                 case "user-list":
                     respData = await UserHandler.ListRespond(content);
                     break;
@@ -197,6 +201,26 @@ public static class Program
                     break;
 
                 case "user-blacklist":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "show-videos":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "show-fails":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "start":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "stop":
+                    // respData = await UserHandler.ListRespond(content);
+                    break;
+
+                case "status":
                     // respData = await UserHandler.ListRespond(content);
                     break;
 

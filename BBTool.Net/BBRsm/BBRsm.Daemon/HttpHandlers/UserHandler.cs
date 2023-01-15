@@ -87,13 +87,51 @@ public static class UserHandler
         return respObj.ToJson();
     }
 
+    public static async Task<string> ClearRespond(string content)
+    {
+        var respObj = new RUser.ClearResponse();
+
+        Logger.Log($"删除所有账户");
+
+        foreach (var item in Global.Accounts)
+        {
+            var account = item.Value;
+
+            Logger.Log($"正在删除账户：{account.Mid}");
+
+            var api = new Logout();
+            var res = await api.Send(account.Cookie);
+            if (api.Code != 0)
+            {
+                respObj.Code = api.Code;
+                respObj.Message = api.ErrorMessage;
+            }
+
+            if (!res)
+            {
+                respObj.Code = 1;
+                respObj.Message = "退出登录响应异常，可能您并未登录或已经退出了";
+            }
+
+            // 删数据库
+            var db = RedisHelper.Database;
+            db.KeyDelete(RedisHelper.Keys.Accounts + "/" + account.Mid);
+        }
+
+        // 删内存
+        Global.Accounts.Clear();
+
+        return respObj.ToJson();
+    }
+
     public static async Task<string> ListRespond(string content)
     {
         Logger.Log($"回复账户列表");
 
         var respObj = new RUser.ListResponse
         {
-            Users = Global.Accounts.Select(item => (UserInfo)item.Value).ToList()
+            Users = Global.Accounts.Select(item => (UserInfo)item.Value).ToList(),
+            Count = Global.Accounts.Count,
         };
 
         return respObj.ToJson();

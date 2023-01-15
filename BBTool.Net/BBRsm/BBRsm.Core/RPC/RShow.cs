@@ -1,11 +1,25 @@
-﻿namespace BBRsm.Core.RPC;
+﻿using BBRsm.Core.BiliApiImpl;
+using BBTool.Core.BiliApi.Entities;
+
+namespace BBRsm.Core.RPC;
 
 public static class RShow
 {
-    public class Request : IRequest
+    public class VideoRequest : BaseListRequest
     {
-        public string Command { get; set; } = "show";
+        public override string Command { get; set; } = "show-videos";
+    }
 
-        public string Key { get; set; } = string.Empty;
+    public class VideoResponse : BaseListResponse<VideoInfo>
+    {
+    }
+
+    public class FailsRequest : BaseListRequest
+    {
+        public override string Command { get; set; } = "show-fails";
+    }
+
+    public class FailsResponse : BaseListResponse<FailAttempt>
+    {
     }
 }

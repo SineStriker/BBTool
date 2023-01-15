@@ -34,11 +34,23 @@ public static class RUser
         public string Message { get; set; } = string.Empty;
     }
 
-    public class ListRequest : IRequest
+    public class ClearRequest : IRequest
     {
-        public virtual string Command { get; set; } = "user-list";
+        public string Command { get; set; } = "user-remove";
 
         public long MidRelated { get; set; } = 0;
+    }
+
+    public class ClearResponse : IResponse
+    {
+        public int Code { get; set; } = 0;
+
+        public string Message { get; set; } = string.Empty;
+    }
+
+    public class ListRequest : BaseListRequest
+    {
+        public override string Command { get; set; } = "user-list";
     }
 
     public class ActiveListRequest : ListRequest
@@ -66,12 +78,12 @@ public static class RUser
         public override string Command { get; set; } = "user-blacklist";
     }
 
-    public class ListResponse : IResponse
+    public class ListResponse : BaseListResponse<UserInfo>
     {
-        public int Code { get; set; } = 0;
-
-        public string Message { get; set; } = string.Empty;
-
-        public List<UserInfo> Users { get; set; } = new();
+        public List<UserInfo> Users
+        {
+            get => Values;
+            set => Values = value;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using A180.CoreLib.Text;
+﻿using A180.CoreLib.Maths;
+using A180.CoreLib.Text;
 using A180.CoreLib.Text.Extensions;
 using BBDown.Core;
 using BBRsm.Core;
@@ -6,7 +7,6 @@ using BBRsm.Core.BiliApiImpl;
 using BBTool.Config;
 using BBTool.Config.Tasks;
 using BBTool.Core.BiliApi.Codes;
-using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.User;
 
 namespace BBRsm.Daemon.Tasks;
@@ -35,15 +35,23 @@ public class Consumer : BaseTask
             bool tooFrequent = false;
             bool expired = false;
             bool skip = false;
+
+            string key;
+            bool flag;
             UserAndCookie account;
 
             using (var guard = new LocalTaskGuard())
             {
-                string key;
-
                 // 如果私信为空，等待
+                flag = true;
                 while (string.IsNullOrEmpty(Global.Config.Message))
                 {
+                    if (flag)
+                    {
+                        Logger.Log("等待指定消息内容...");
+                        flag = false;
+                    }
+
                     if (!guard.Sleep(Global.Config.WaitTimeout))
                     {
                         ret = -2;
@@ -52,8 +60,15 @@ public class Consumer : BaseTask
                 }
 
                 // 如果活跃账户为空，等待
+                flag = true;
                 while (Global.Accounts.Count == 0)
                 {
+                    if (flag)
+                    {
+                        Logger.Log("当前没有可用账户，等待添加...");
+                        flag = false;
+                    }
+
                     if (!guard.Sleep(Global.Config.WaitTimeout))
                     {
                         ret = -2;
@@ -62,13 +77,23 @@ public class Consumer : BaseTask
                 }
 
                 // 选择合适的发送者
-                //...
-                account = new();
+                {
+                    var rdList = new List<ARandom<long>.RandomConfig>();
+                    foreach (var item in Global.Accounts)
+                    {
+                        rdList.Add(new(item.Value.Mid, item.Value.CurrentLevel));
+                    }
+
+                    var target = ARandom<long>.Generate(rdList);
+                    account = Global.Accounts[target.Value];
+
+                    Logger.Log($"本次使用账户：{account.Mid} {account.UserName}");
+                }
 
                 var sender = account.Mid;
                 var cookie = account.Cookie;
 
-                // 更新睡眠队列
+                // 更新账户队列
                 {
                     var keys = new List<long>();
                     foreach (var item in Global.BlockedAccounts)
@@ -81,6 +106,8 @@ public class Consumer : BaseTask
 
                     foreach (var item in keys)
                     {
+                        Logger.Log($"将{item}移动到活跃队列");
+                        
                         var info = Global.Accounts[item];
                         Global.BlockedAccounts.Remove(item);
                         Global.ActiveAccounts.Add(item, info.CurrentLevel);
@@ -88,8 +115,15 @@ public class Consumer : BaseTask
                 }
 
                 // 如果资源队列为空，等待
+                flag = true;
                 while (Global.VideoQueue.Count == 0)
                 {
+                    if (flag)
+                    {
+                        Logger.Log("等待搜索内容更新...");
+                        flag = false;
+                    }
+
                     if (!guard.Sleep(Global.Config.WaitTimeout))
                     {
                         ret = -2;
@@ -157,16 +191,35 @@ public class Consumer : BaseTask
                     var api = new GetRecentTalk();
                     var msgList = await api.Send(mid, 20, cookie);
 
-                    if (api.Code != 0)
+                    var code = api.Code;
+                    if (code != 0)
                     {
-                        Logger.LogWarn($"{logPrefix} {api.ErrorMessage}");
-                        skip = true;
+                        if (code < 0)
+                        {
+                            if (code == (int)Request.ErrorCode.NotLogin)
+                            {
+                                // 账号未登录
+                                Logger.LogError($"{logPrefix} 获取消息失败：{api.ErrorMessage}");
+                                expired = true;
+                            }
+                            else
+                            {
+                                // 必须中断的错误
+                                Logger.LogError($"{logPrefix} 获取消息失败，致命错误：{api.ErrorMessage}");
+                                netError = true;
+                            }
+                        }
+                        else
+                        {
+                            Logger.LogWarn($"{logPrefix} 获取消息失败：{api.ErrorMessage}");
+                            skip = true;
+                        }
 
                         // 失败尝试存入数据库
                         key = RedisHelper.Keys.Fails + "/" + mid;
                         var attempt = new FailAttempt
                         {
-                            Code = api.Code,
+                            Code = code,
                             Message = api.ErrorMessage,
                             UserName = uname,
                         };
@@ -193,9 +246,18 @@ public class Consumer : BaseTask
                     {
                         if (code < 0)
                         {
-                            // 必须中断的错误
-                            Logger.LogError($"{logPrefix} 致命错误：{api.ErrorMessage}");
-                            netError = true;
+                            if (code == (int)Request.ErrorCode.NotLogin)
+                            {
+                                // 账号未登录
+                                Logger.LogError($"{logPrefix} 获取消息失败：{api.ErrorMessage}");
+                                expired = true;
+                            }
+                            else
+                            {
+                                // 必须中断的错误
+                                Logger.LogError($"{logPrefix} 致命错误：{api.ErrorMessage}");
+                                netError = true;
+                            }
                         }
                         else if (code == (int)MessageReturn.ErrorCode.TooFrequent)
                         {
@@ -244,11 +306,22 @@ public class Consumer : BaseTask
             // 账号失效
             if (expired)
             {
+                // 删内存
+                Global.Accounts.Remove(account.Mid);
+
+                // 删数据库
+                key = RedisHelper.Keys.Accounts + "/" + account.Mid;
+                db.KeyDelete(key);
+
+                // 移动到失效列表
+                key = RedisHelper.Keys.Expired + "/" + account.Mid;
+                db.StringSet(key, account.ToJson());
             }
 
             // 发送触发高频上限
             if (tooFrequent)
             {
+                Logger.Log($"将{account.Mid}移动到睡眠队列");
                 Global.BlockedAccounts.Add(account.Mid, DateTime.Now);
                 Global.ActiveAccounts.Remove(account.Mid);
             }
@@ -263,7 +336,7 @@ public class Consumer : BaseTask
                     goto exit;
                 }
             }
-            
+
             // 下一轮循环
         }
 

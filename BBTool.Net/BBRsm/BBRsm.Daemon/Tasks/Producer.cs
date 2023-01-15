@@ -21,19 +21,29 @@ public class Producer : BaseTask
     public async Task<int> Run()
     {
         int ret = 0;
-        bool over = false;
+        var db = RedisHelper.Database;
 
         // 大循环
-        while (!over)
+        while (true)
         {
             bool finishedOnce = false;
             bool netError = false;
 
+            string key;
+            bool flag;
+
             using (var guard = new LocalTaskGuard())
             {
                 // 如果关键词为空，等待
+                flag = true;
                 while (string.IsNullOrEmpty(Global.Config.KeyWord))
                 {
+                    if (flag)
+                    {
+                        Logger.Log("等待指定关键词...");
+                        flag = false;
+                    }
+
                     if (!guard.Sleep(Global.Config.WaitTimeout))
                     {
                         ret = -2;
@@ -72,8 +82,7 @@ public class Producer : BaseTask
                     // 判断是否遇到过这个视频
                     foreach (var item in res.Videos)
                     {
-                        var db = RedisHelper.Database;
-                        var key = RedisHelper.Keys.Videos + "/" + item.Avid;
+                        key = RedisHelper.Keys.Videos + "/" + item.Avid;
                         if (db.KeyExists(key))
                         {
                             // 已存在视频
@@ -97,15 +106,9 @@ public class Producer : BaseTask
                     if (!guard.Sleep(Global.Config.GetTimeout))
                     {
                         ret = -2;
-                        over = true;
-                        break;
+                        goto exit;
                     }
                 }
-            }
-
-            if (over)
-            {
-                break;
             }
 
             // 网络错误，等待网络恢复
@@ -115,13 +118,8 @@ public class Producer : BaseTask
                 ret = await pingTask.Run();
                 if (ret != 0)
                 {
-                    over = true;
+                    goto exit;
                 }
-            }
-
-            if (over)
-            {
-                break;
             }
 
             // 搜索间隔
@@ -133,13 +131,15 @@ public class Producer : BaseTask
                     if (!guard.Sleep(Global.Config.MessageTimeout))
                     {
                         ret = -2;
-                        over = true;
+                        goto exit;
                     }
                 }
             }
 
             // 进入下一次循环
         }
+
+        exit:
 
         return ret;
     }

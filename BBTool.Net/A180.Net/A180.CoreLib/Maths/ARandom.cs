@@ -1,6 +1,6 @@
 ﻿namespace A180.CoreLib.Maths;
 
-public class ARandom<T>
+public static class ARandom<T>
 {
     public class RandomConfig
     {
@@ -15,17 +15,15 @@ public class ARandom<T>
         public int Weight { get; set; }
     }
 
-    public List<RandomConfig> ConfigList = new();
-
-    public RandomConfig Generate()
+    public static RandomConfig Generate(List<RandomConfig> configList)
     {
         //累加结算总权重
-        int totalWeight = ConfigList.Aggregate(0, (all, next) => all += next.Weight);
+        int totalWeight = configList.Aggregate(0, (all, next) => all += next.Weight);
 
         //在0~total范围内随机
         int cursor = 0;
         int random = new Random().Next(0, totalWeight);
-        foreach (var item in ConfigList)
+        foreach (var item in configList)
         {
             //累加当前权重
             cursor += item.Weight;

@@ -3,12 +3,9 @@ using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using A180.CoreLib.Text;
 using A180.CoreLib.Text.Extensions;
-using BBDown.Core;
 using BBRsm.Core.FuncTemplates;
 using BBRsm.Core.RPC;
-using BBTool.Config;
 using BBTool.Config.Tasks;
-using ConsoleTables;
 
 namespace BBRsm.Controller.Commands;
 
@@ -31,6 +28,11 @@ public class UserCommand : Command
     public readonly Argument<long> UserId = new("uid", "用户ID");
 
     /// <summary>
+    /// 删除所有账户
+    /// </summary>
+    public readonly Command ClearUsers = new("clear", "删除所有账户");
+
+    /// <summary>
     /// 显示所有账户
     /// </summary>
     public readonly Command ShowUsers = new("list", "显示所有账户");
@@ -43,12 +45,14 @@ public class UserCommand : Command
 
         RemoveUser.Add(UserId);
         Add(RemoveUser);
+        
+        Add(ClearUsers);
+        Add(ShowUsers);
 
         AddUser.SetHandler(AddRoutine);
-        RemoveUser.SetHandler(RemoveRoutine);
+        RemoveUser.SetHandler(RemoveRoutine);;
+        ClearUsers.SetHandler(ClearRoutine);
         ShowUsers.SetHandler(ListRoutine);
-
-        this.SetHandler(Routine);
     }
 
     private async Task AddRoutine(InvocationContext context)
@@ -106,9 +110,14 @@ public class UserCommand : Command
         });
     }
 
-    private async Task Routine(InvocationContext context)
+    private async Task ClearRoutine(InvocationContext context)
     {
-        AStdout.Warning("缺少命令");
+        var obj = new RUser.ClearRequest();
+
+        await ClientSend.Post(obj, resp =>
+        {
+            AStdout.Debug("OK"); // 成功
+        });
     }
 
     public static async Task SendListRequest(RUser.ListRequest req)

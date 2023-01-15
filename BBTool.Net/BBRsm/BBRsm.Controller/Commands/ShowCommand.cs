@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using A180.CoreLib.Text;
 using A180.CoreLib.Text.Extensions;
 using BBRsm.Core.FuncTemplates;
@@ -87,11 +88,23 @@ public class ShowCommand : Command
     private async Task VideosRoutine(InvocationContext context)
     {
         var res = context.ParseResult;
+        var obj = new RShow.VideoRequest
+        {
+            Verbose = res.HasOption(Verbose)
+        };
+
+        await ClientSend.Post(obj, resp => { });
     }
 
     private async Task FailsRoutine(InvocationContext context)
     {
         var res = context.ParseResult;
+        var obj = new RShow.FailsRequest
+        {
+            Verbose = res.HasOption(Verbose)
+        };
+
+        await ClientSend.Post(obj, resp => { });
     }
 
     private async Task BlackListRoutine(InvocationContext context)

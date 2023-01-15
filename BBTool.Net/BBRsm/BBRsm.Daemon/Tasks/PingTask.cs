@@ -1,4 +1,5 @@
 ﻿using System.Net.NetworkInformation;
+using BBDown.Core;
 using BBTool.Config.Tasks;
 
 namespace BBRsm.Daemon.Tasks;
@@ -14,20 +15,20 @@ public class PingTask : BaseTask
         int ret = 0;
         using (var guard = new LocalTaskGuard())
         {
-            bool online = false; //是否在线
-            while (!online)
+            Logger.Log("等待网络恢复中，使用ping测试B站...");
+            while (true)
             {
                 var ping = new Ping();
                 var pingReply = await ping.SendPingAsync("https://www.bilibili.com/");
                 if (pingReply.Status == IPStatus.Success)
                 {
-                    online = true;
                     Console.WriteLine("当前在线，已ping通！");
+                    break;
                 }
-                else
-                {
-                    Console.WriteLine("不在线，ping不通！");
-                }
+                // else
+                // {
+                //     Console.WriteLine("不在线，ping不通！");
+                // }
 
                 // 设置等待间隔
                 if (!guard.Sleep(Global.Config.WaitTimeout))
