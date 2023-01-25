@@ -53,7 +53,7 @@ public class Producer : BaseTask
 
                 // 检索
                 int page = 0;
-                for (;; page++)
+                for (; ; page++)
                 {
                     var api = new SearchVideo();
                     var res = await api.Send(
@@ -93,9 +93,11 @@ public class Producer : BaseTask
 
                         // 存内存
                         Global.VideoQueue.AddLast(item);
+                    }
 
-                        // 存数据库
-                        db.StringSet(key, item.ToJson());
+                    if (finishedOnce)
+                    {
+                        break;
                     }
 
                     var first = res.Videos.First();
@@ -128,7 +130,7 @@ public class Producer : BaseTask
                 using (var guard = new LocalTaskGuard())
                 {
                     // 设置等待间隔
-                    if (!guard.Sleep(Global.Config.MessageTimeout))
+                    if (!guard.Sleep(Global.Config.SearchTimeout))
                     {
                         ret = -2;
                         goto exit;
@@ -139,7 +141,7 @@ public class Producer : BaseTask
             // 进入下一次循环
         }
 
-        exit:
+    exit:
 
         return ret;
     }

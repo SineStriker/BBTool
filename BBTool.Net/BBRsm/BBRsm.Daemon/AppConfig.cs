@@ -11,7 +11,7 @@ public class AppConfig : MessageConfig
 
     public static readonly SortOrder DefaultSortOrder = SortOrder.PubDate;
 
-    public static readonly long DefaultBlockTimeout = 864000000;
+    public static readonly long DefaultBlockTimeout = 90000000;
 
     public static readonly long DefaultSearchTimeout = 7200000;
 

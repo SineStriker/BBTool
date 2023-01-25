@@ -16,9 +16,9 @@ public static class UserHandler
         var respObj = new RUser.AddResponse();
 
         var obj = content.FromJson<RUser.AddRequest>();
-        var cookie = obj.Cookie;
+        Logger.Log($"添加账户：{obj.Cookie}");
 
-        Logger.Log($"添加账户：{cookie}");
+        var cookie = obj.Cookie;
 
         var api = new GetInfo();
         var user = await api.Send(cookie);
@@ -30,15 +30,7 @@ public static class UserHandler
         else
         {
             respObj.Info = user;
-
-            var userAndCookie = new UserAndCookie(user!, cookie);
-
-            // 存内存
-            Global.Accounts.Add(user!.Mid, userAndCookie);
-
-            // 存数据库
-            var db = RedisHelper.Database;
-            db.StringSet(RedisHelper.Keys.Accounts + "/" + user.Mid, userAndCookie.ToJson());
+            Global.AddAccount(new UserAndCookie(user!, cookie));
         }
 
         return respObj.ToJson();
@@ -49,39 +41,46 @@ public static class UserHandler
         var respObj = new RUser.RemoveResponse();
 
         var obj = content.FromJson<RUser.RemoveRequest>();
-        var userId = obj.Mid;
+        Logger.Log($"删除账户：{obj.Mid}");
 
-        Logger.Log($"删除账户：{userId}");
-
-        if (Global.Accounts.TryGetValue(obj.Mid, out var user))
+        if (Global.LogoutTask.Status == TaskStatus.Running)
         {
-            var api = new Logout();
-            var res = await api.Send(user.Cookie);
-            if (api.Code != 0)
-            {
-                respObj.Code = api.Code;
-                respObj.Message = api.ErrorMessage;
-            }
+            respObj.Code = 1;
+            respObj.Message = "正在执行注销";
+        }
+        else if (Global.CurrentAccount == obj.Mid)
+        {
+            respObj.Code = 1;
+            respObj.Message = "此账户正在使用";
+        }
+        {
+            var userId = obj.Mid;
 
-            if (!res)
+            if (Global.Accounts.TryGetValue(userId, out var user))
             {
-                respObj.Code = 1;
-                respObj.Message = "退出登录响应异常，可能您并未登录或已经退出了";
+                var api = new Logout();
+                var res = await api.Send(user.Cookie);
+                if (api.Code != 0)
+                {
+                    respObj.Code = api.Code;
+                    respObj.Message = api.ErrorMessage;
+                }
+
+                if (!res)
+                {
+                    respObj.Code = 1;
+                    respObj.Message = "退出登录响应异常，可能您并未登录或已经退出了";
+                }
+                else
+                {
+                    Global.RemoveAccount(userId);
+                }
             }
             else
             {
-                // 删内存
-                Global.Accounts.Remove(userId);
-
-                // 删数据库
-                var db = RedisHelper.Database;
-                db.KeyDelete(RedisHelper.Keys.Accounts + "/" + user.Mid);
+                respObj.Code = -1;
+                respObj.Message = "该用户不在数据库中";
             }
-        }
-        else
-        {
-            respObj.Code = -1;
-            respObj.Message = "该用户不在数据库中";
         }
 
         return respObj.ToJson();
@@ -92,41 +91,50 @@ public static class UserHandler
         var respObj = new RUser.ClearResponse();
 
         Logger.Log($"删除所有账户");
-
-        foreach (var item in Global.Accounts)
+        if (Global.LogoutTask.Status == TaskStatus.Running)
         {
-            var account = item.Value;
-
-            Logger.Log($"正在删除账户：{account.Mid}");
-
-            var api = new Logout();
-            var res = await api.Send(account.Cookie);
-            if (api.Code != 0)
-            {
-                respObj.Code = api.Code;
-                respObj.Message = api.ErrorMessage;
-            }
-
-            if (!res)
-            {
-                respObj.Code = 1;
-                respObj.Message = "退出登录响应异常，可能您并未登录或已经退出了";
-            }
-
-            // 删数据库
-            var db = RedisHelper.Database;
-            db.KeyDelete(RedisHelper.Keys.Accounts + "/" + account.Mid);
+            respObj.Code = 1;
+            respObj.Message = "正在执行注销";
         }
+        else
+        {
+            Global.LogoutTask.Start();
 
-        // 删内存
-        Global.Accounts.Clear();
-
+            respObj.Code = 1;
+            respObj.Message = "开始执行注销任务";
+        }
         return respObj.ToJson();
     }
 
     public static async Task<string> ListRespond(string content)
     {
         Logger.Log($"回复账户列表");
+
+        var respObj = new RUser.ListResponse
+        {
+            Users = Global.Accounts.Select(item => (UserInfo)item.Value).ToList(),
+            Count = Global.Accounts.Count,
+        };
+
+        return respObj.ToJson();
+    }
+
+    public static async Task<string> ActiveRespond(string content)
+    {
+        Logger.Log($"回复活跃账户列表");
+
+        var respObj = new RUser.ListResponse
+        {
+            Users = Global.Accounts.Select(item => (UserInfo)item.Value).ToList(),
+            Count = Global.Accounts.Count,
+        };
+
+        return respObj.ToJson();
+    }
+
+    public static async Task<string> BlockedRespond(string content)
+    {
+        Logger.Log($"回复睡眠账户列表");
 
         var respObj = new RUser.ListResponse
         {

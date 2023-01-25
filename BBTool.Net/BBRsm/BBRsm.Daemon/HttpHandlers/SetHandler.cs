@@ -17,16 +17,16 @@ public static class SetHandler
 
         switch (obj.Key)
         {
-            case "keyword":
+            case GetSetCommandProtocol.Keyword:
                 Global.Config.KeyWord = obj.Value;
                 break;
 
-            case "message":
+            case GetSetCommandProtocol.Message:
                 Global.Config.Message = obj.Value;
                 break;
 
-            case "get-timeout":
-            case "t1":
+            case GetSetCommandProtocol.GetTimeout:
+            case GetSetCommandProtocol.GetTimeout_2:
             {
                 var val = Global.Config.GetTimeout;
                 ServerParse.ParseDigit(obj.Value, ref val, respObj);
@@ -34,8 +34,8 @@ public static class SetHandler
             }
                 break;
 
-            case "message-timeout":
-            case "t2":
+            case GetSetCommandProtocol.MessageTimeout:
+            case GetSetCommandProtocol.MessageTimeout_2:
             {
                 var val = Global.Config.MessageTimeout;
                 ServerParse.ParseDigit(obj.Value, ref val, respObj);
@@ -43,7 +43,7 @@ public static class SetHandler
             }
                 break;
 
-            case "section":
+            case GetSetCommandProtocol.Section:
             {
                 var val = Global.Config.PartitionNum;
                 ServerParse.ParseDigit(obj.Value, ref val, respObj);
@@ -51,7 +51,7 @@ public static class SetHandler
             }
                 break;
 
-            case "block-timeout":
+            case GetSetCommandProtocol.BlockTimeout:
             {
                 var val = Global.Config.BlockTimeout;
                 ServerParse.ParseDigit(obj.Value, ref val, respObj);
@@ -59,7 +59,7 @@ public static class SetHandler
             }
                 break;
 
-            case "search-timeout":
+            case GetSetCommandProtocol.SearchTimeout:
             {
                 var val = Global.Config.SearchTimeout;
                 ServerParse.ParseDigit(obj.Value, ref val, respObj);
@@ -67,7 +67,7 @@ public static class SetHandler
             }
                 break;
 
-            case "wait-timeout":
+            case GetSetCommandProtocol.WaitTimeout:
             {
                 var val = Global.Config.WaitTimeout;
                 ServerParse.ParseDigit(obj.Value, ref val, respObj);

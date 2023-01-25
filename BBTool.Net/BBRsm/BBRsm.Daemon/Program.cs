@@ -84,24 +84,7 @@ public static class Program
             var server = RedisHelper.Server;
 
             // 恢复账户
-            var accounts = server.Keys(-1, $"{RedisHelper.Keys.Accounts}\\/?*");
-            foreach (var item in accounts)
-            {
-                var s = db.StringGet(item);
-                var account = s.ToString().FromJson<UserAndCookie>();
-                Global.Accounts.Add(account.Mid, account);
-
-                Logger.LogColor($"发现账户{account.Mid}");
-            }
-
-            // 恢复已发送用户
-            // var users = server.Keys(1, $"{RedisHelper.Keys.SentUsers}\\/?*");
-            // foreach (var item in users)
-            // {
-            //     var s = db.StringGet(item);
-            //     var mid = long.Parse(s.ToString());
-            //     Global.SentUsers.Add(mid);
-            // }
+            Global.RecoverData();
         }
 
         // 添加中断
@@ -119,6 +102,11 @@ public static class Program
 
         // 开始监听
         await Global.Server.Start(ServerHandler);
+
+        if (Global.LogoutTask.Status == TaskStatus.Running)
+        {
+            Global.LogoutTask.Wait();
+        }
     }
 
     static async Task<bool> ServerHandler(HttpListenerRequest req, HttpListenerResponse resp)
@@ -160,68 +148,68 @@ public static class Program
             var command = reqObj.Command;
             switch (command)
             {
-                case "get":
+                case CommmandProtocol.Get:
                     respData = await GetHandler.Respond(content);
                     break;
 
-                case "set":
+                case CommmandProtocol.Set:
                     respData = await SetHandler.Respond(content);
                     break;
 
-                case "user-add":
+                case CommmandProtocol.UserAdd:
                     respData = await UserHandler.AddRespond(content);
                     break;
 
-                case "user-remove":
+                case CommmandProtocol.UserRemove:
                     respData = await UserHandler.RemoveRespond(content);
                     break;
 
-                case "user-clear":
+                case CommmandProtocol.UserClear:
                     respData = await UserHandler.ClearRespond(content);
                     break;
 
-                case "user-list":
+                case CommmandProtocol.UserAll:
                     respData = await UserHandler.ListRespond(content);
                     break;
 
-                case "user-active":
+                case CommmandProtocol.UserActive:
+                    respData = await UserHandler.ActiveRespond(content);
+                    break;
+
+                case CommmandProtocol.UserBlocked:
+                    respData = await UserHandler.BlockedRespond(content);
+                    break;
+
+                case CommmandProtocol.UserExpired:
                     // respData = await UserHandler.ListRespond(content);
                     break;
 
-                case "user-blocked":
+                case CommmandProtocol.UserReceivers:
                     // respData = await UserHandler.ListRespond(content);
                     break;
 
-                case "user-expired":
+                case CommmandProtocol.UserBlackList:
                     // respData = await UserHandler.ListRespond(content);
                     break;
 
-                case "user-receivers":
-                    // respData = await UserHandler.ListRespond(content);
+                case CommmandProtocol.ShowVideos:
+                    respData = await ShowHandler.VideosRespond(content);
                     break;
 
-                case "user-blacklist":
-                    // respData = await UserHandler.ListRespond(content);
+                case CommmandProtocol.ShowFails:
+                    respData = await ShowHandler.FailsRespond(content);
                     break;
 
-                case "show-videos":
-                    // respData = await UserHandler.ListRespond(content);
+                case CommmandProtocol.Start:
+                    respData = await ControlHandler.StartRespond(content);
                     break;
 
-                case "show-fails":
-                    // respData = await UserHandler.ListRespond(content);
+                case CommmandProtocol.Stop:
+                    respData = await ControlHandler.StopRespond(content);
                     break;
 
-                case "start":
-                    // respData = await UserHandler.ListRespond(content);
-                    break;
-
-                case "stop":
-                    // respData = await UserHandler.ListRespond(content);
-                    break;
-
-                case "status":
-                    // respData = await UserHandler.ListRespond(content);
+                case CommmandProtocol.Status:
+                    respData = await ControlHandler.StatusRespond(content);
                     break;
 
                 default:
@@ -230,7 +218,7 @@ public static class Program
             }
         }
 
-        handleOver:
+    handleOver:
 
         using (var stream = resp.OutputStream)
         {

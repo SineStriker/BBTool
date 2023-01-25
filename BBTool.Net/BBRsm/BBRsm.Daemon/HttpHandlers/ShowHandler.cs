@@ -5,9 +5,16 @@ namespace BBRsm.Daemon.HttpHandlers;
 
 public static class ShowHandler
 {
-    public static async Task<string> VideoRespond(string content)
+    public static async Task<string> VideosRespond(string content)
     {
-        var respObj = new RShow.VideoRequest();
+        var respObj = new RShow.VideoResponse();
+
+        return respObj.ToJson();
+    }
+
+    public static async Task<string> FailsRespond(string content)
+    {
+        var respObj = new RShow.FailsResponse();
 
         return respObj.ToJson();
     }

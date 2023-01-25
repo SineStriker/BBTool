@@ -11,12 +11,12 @@ public static class GetHandler
         var respObj = new RGet.Response();
 
         var obj = content.FromJson<RGet.Request>();
-        
+
         Logger.Log($"回复{obj.Key}的值");
-        
+
         switch (obj.Key)
         {
-            case "keyword":
+            case GetSetCommandProtocol.Keyword:
                 if (string.IsNullOrEmpty(Global.Config.KeyWord))
                 {
                     respObj.Code = 1;
@@ -29,7 +29,7 @@ public static class GetHandler
 
                 break;
 
-            case "message":
+            case GetSetCommandProtocol.Message:
                 if (string.IsNullOrEmpty(Global.Config.Message))
                 {
                     respObj.Code = 1;
@@ -42,29 +42,29 @@ public static class GetHandler
 
                 break;
 
-            case "get-timeout":
-            case "t1":
+            case GetSetCommandProtocol.GetTimeout:
+            case GetSetCommandProtocol.GetTimeout_2:
                 respObj.Value = Global.Config.GetTimeout.ToString();
                 break;
 
-            case "message-timeout":
-            case "t2":
+            case GetSetCommandProtocol.MessageTimeout:
+            case GetSetCommandProtocol.MessageTimeout_2:
                 respObj.Value = Global.Config.MessageTimeout.ToString();
                 break;
 
-            case "section":
+            case GetSetCommandProtocol.Section:
                 respObj.Value = Global.Config.PartitionNum.ToString();
                 break;
 
-            case "block-timeout":
+            case GetSetCommandProtocol.BlockTimeout:
                 respObj.Value = Global.Config.BlockTimeout.ToString();
                 break;
 
-            case "search-timeout":
+            case GetSetCommandProtocol.SearchTimeout:
                 respObj.Value = Global.Config.SearchTimeout.ToString();
                 break;
 
-            case "wait-timeout":
+            case GetSetCommandProtocol.WaitTimeout:
                 respObj.Value = Global.Config.WaitTimeout.ToString();
                 break;
 

@@ -7,6 +7,7 @@ using BBRsm.Core.BiliApiImpl;
 using BBTool.Config;
 using BBTool.Config.Tasks;
 using BBTool.Core.BiliApi.Codes;
+using BBTool.Core.BiliApi.Entities;
 using BBTool.Core.BiliApi.User;
 
 namespace BBRsm.Daemon.Tasks;
@@ -61,8 +62,18 @@ public class Consumer : BaseTask
 
                 // 如果活跃账户为空，等待
                 flag = true;
-                while (Global.Accounts.Count == 0)
+                while (true)
                 {
+                    // 选择账户
+                    var tmp = Global.SelectAccount();
+                    if (tmp != null)
+                    {
+                        Global.CurrentAccount = tmp.Mid;
+                        account = tmp;
+                        Logger.Log($"本次使用账户：{account.Mid} {account.UserName}");
+                        break;
+                    }
+
                     if (flag)
                     {
                         Logger.Log("当前没有可用账户，等待添加...");
@@ -74,20 +85,6 @@ public class Consumer : BaseTask
                         ret = -2;
                         goto exit;
                     }
-                }
-
-                // 选择合适的发送者
-                {
-                    var rdList = new List<ARandom<long>.RandomConfig>();
-                    foreach (var item in Global.Accounts)
-                    {
-                        rdList.Add(new(item.Value.Mid, item.Value.CurrentLevel));
-                    }
-
-                    var target = ARandom<long>.Generate(rdList);
-                    account = Global.Accounts[target.Value];
-
-                    Logger.Log($"本次使用账户：{account.Mid} {account.UserName}");
                 }
 
                 var sender = account.Mid;
@@ -107,17 +104,31 @@ public class Consumer : BaseTask
                     foreach (var item in keys)
                     {
                         Logger.Log($"将{item}移动到活跃队列");
-                        
-                        var info = Global.Accounts[item];
-                        Global.BlockedAccounts.Remove(item);
-                        Global.ActiveAccounts.Add(item, info.CurrentLevel);
+
+                        Global.SetAccountActive(item, true);
                     }
                 }
 
+                VideoInfo videoInfo;
+
                 // 如果资源队列为空，等待
                 flag = true;
-                while (Global.VideoQueue.Count == 0)
+                while (true)
                 {
+
+                    // 取出第一个视频
+                    var tmp = Global.PopVideo();
+                    if (tmp != null)
+                    {
+                        videoInfo = tmp;
+
+                        // 存数据库
+                        key = RedisHelper.Keys.Videos + "/" + videoInfo.Avid;
+                        db.StringSet(key, videoInfo.ToJson());
+
+                        break;
+                    }
+
                     if (flag)
                     {
                         Logger.Log("等待搜索内容更新...");
@@ -130,11 +141,6 @@ public class Consumer : BaseTask
                         goto exit;
                     }
                 }
-
-                // 取出第一个视频
-                var videoInfo = Global.VideoQueue.First!.Value;
-                Global.VideoQueue.RemoveFirst();
-
                 var mid = videoInfo.Mid;
                 var uname = videoInfo.UserName;
                 var unameFormatted = AStrings.Pad(uname, 20);
@@ -295,6 +301,8 @@ public class Consumer : BaseTask
                     httpSent = true;
                 }
 
+                Global.CurrentAccount = 0;
+
                 // 避免发送请求太快，设置延时
                 if (httpSent && !guard.Sleep(skip ? MessageTool.Config.GetTimeout : MessageTool.Config.MessageTimeout))
                 {
@@ -306,12 +314,7 @@ public class Consumer : BaseTask
             // 账号失效
             if (expired)
             {
-                // 删内存
                 Global.Accounts.Remove(account.Mid);
-
-                // 删数据库
-                key = RedisHelper.Keys.Accounts + "/" + account.Mid;
-                db.KeyDelete(key);
 
                 // 移动到失效列表
                 key = RedisHelper.Keys.Expired + "/" + account.Mid;
@@ -322,8 +325,20 @@ public class Consumer : BaseTask
             if (tooFrequent)
             {
                 Logger.Log($"将{account.Mid}移动到睡眠队列");
-                Global.BlockedAccounts.Add(account.Mid, DateTime.Now);
+
+                var now = DateTime.Now;
+
+                // 操作内存
                 Global.ActiveAccounts.Remove(account.Mid);
+
+                Global.BlockedAccounts.Add(account.Mid, now);
+
+                // 操作数据库
+                key = RedisHelper.Keys.Active + "/" + account.Mid;
+                db.KeyDelete(key);
+
+                key = RedisHelper.Keys.Blocked + "/" + account.Mid;
+                db.StringSet(key, now.ToJson());
             }
 
             // 网络错误，等待网络恢复
@@ -340,7 +355,7 @@ public class Consumer : BaseTask
             // 下一轮循环
         }
 
-        exit:
+    exit:
 
         Logger.LogColor($"总共发送给了{count}个用户");
 

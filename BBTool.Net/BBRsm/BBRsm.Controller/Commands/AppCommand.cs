@@ -36,10 +36,10 @@ public class AppCommand : RootCommand
         Add(Set);
         Add(User);
         Add(Users);
-        Add(Show);
-        Add(Start);
-        Add(Stop);
-        Add(Status);
+        // Add(Show);
+        // Add(Start);
+        // Add(Stop);
+        // Add(Status);
     }
 
     private async Task StatusRoutine(InvocationContext context)

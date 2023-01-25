@@ -1,8 +1,6 @@
 ﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
-using A180.CoreLib.Text;
-using A180.CoreLib.Text.Extensions;
 using BBRsm.Core.FuncTemplates;
 using BBRsm.Core.RPC;
 
@@ -113,7 +111,7 @@ public class ShowCommand : Command
 
         var obj = new RUser.HostileListRequest
         {
-            MidRelated = res.GetValueForArgument(UserId)
+            Mid = res.GetValueForArgument(UserId)
         };
 
         await UserCommand.SendListRequest(obj);

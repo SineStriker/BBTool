@@ -4,78 +4,68 @@ namespace BBRsm.Core.RPC;
 
 public static class RUser
 {
-    public class AddRequest : IRequest
+    // Add
+    public class AddRequest : BaseRequest
     {
-        public string Command { get; set; } = "user-add";
+        public override string Command { get; set; } = CommmandProtocol.UserAdd;
 
         public string Cookie { get; set; } = string.Empty;
     }
 
-    public class AddResponse : IResponse
+    public class AddResponse : BaseResponse
     {
-        public int Code { get; set; } = 0;
-
-        public string Message { get; set; } = string.Empty;
-
         public UserInfo? Info { get; set; }
     }
 
-    public class RemoveRequest : IRequest
+    // Remove
+    public class RemoveRequest : BaseMidRequest
     {
-        public string Command { get; set; } = "user-remove";
-
-        public long Mid { get; set; } = 0;
+        public override string Command { get; set; } = CommmandProtocol.UserRemove;
     }
 
-    public class RemoveResponse : IResponse
+    public class RemoveResponse : BaseResponse
     {
-        public int Code { get; set; } = 0;
-
-        public string Message { get; set; } = string.Empty;
     }
 
-    public class ClearRequest : IRequest
+    // Clear
+    public class ClearRequest : BaseRequest
     {
-        public string Command { get; set; } = "user-remove";
-
-        public long MidRelated { get; set; } = 0;
+        public override string Command { get; set; } = CommmandProtocol.UserClear;
     }
 
-    public class ClearResponse : IResponse
+    public class ClearResponse : BaseResponse
     {
-        public int Code { get; set; } = 0;
-
-        public string Message { get; set; } = string.Empty;
     }
 
+    // List
     public class ListRequest : BaseListRequest
     {
-        public override string Command { get; set; } = "user-list";
+        public override string Command { get; set; } = CommmandProtocol.UserAll;
     }
 
     public class ActiveListRequest : ListRequest
     {
-        public override string Command { get; set; } = "user-active";
+        public override string Command { get; set; } = CommmandProtocol.UserActive;
     }
 
     public class BlockedListRequest : ListRequest
     {
-        public override string Command { get; set; } = "user-blocked";
+        public override string Command { get; set; } = CommmandProtocol.UserBlocked;
     }
 
     public class ExpiredListRequest : ListRequest
     {
-        public override string Command { get; set; } = "user-expired";
+        public override string Command { get; set; } = CommmandProtocol.UserExpired;
     }
 
     public class ReceiversListRequest : ListRequest
     {
-        public override string Command { get; set; } = "user-receivers";
+        public override string Command { get; set; } = CommmandProtocol.UserReceivers;
     }
 
     public class HostileListRequest : ListRequest
     {
-        public override string Command { get; set; } = "user-blacklist";
+        public override string Command { get; set; } = CommmandProtocol.UserBlackList;
     }
 
     public class ListResponse : BaseListResponse<UserInfo>

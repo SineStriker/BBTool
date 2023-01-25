@@ -2,22 +2,31 @@
 
 public static class RControl
 {
-    public class StartRequest : IRequest
+    public class BaseControlRequest : BaseRequest
     {
-        public string Command { get; set; } = "start";
-
         public string Task { get; set; } = string.Empty;
     }
 
-    public class StopRequest : IRequest
+    // Start
+    public class StartRequest : BaseControlRequest
     {
-        public string Command { get; set; } = "stop";
-
-        public string Task { get; set; } = string.Empty;
+        public override string Command { get; set; } = CommmandProtocol.Start;
     }
 
-    public class StatusRequest : IRequest
+    // Stop
+    public class StopRequest : BaseControlRequest
     {
-        public string Command { get; set; } = "status";
+        public override string Command { get; set; } = CommmandProtocol.Stop;
+    }
+
+    // Status
+    public class StatusRequest : BaseRequest
+    {
+        public override string Command { get; set; } = CommmandProtocol.Status;
+    }
+
+    public class ControlResponse : BaseResponse
+    {
+
     }
 }
