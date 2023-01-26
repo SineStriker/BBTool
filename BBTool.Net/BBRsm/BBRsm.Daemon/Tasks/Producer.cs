@@ -20,6 +20,9 @@ public class Producer : BaseTask
 
     public async Task<int> Run()
     {
+        // Thread.Sleep(1500);
+        // return 0;
+
         int ret = 0;
         var db = RedisHelper.Database;
 

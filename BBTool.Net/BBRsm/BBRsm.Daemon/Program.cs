@@ -14,6 +14,7 @@ using BBRsm.Core.BiliApiImpl;
 using BBRsm.Core.RPC;
 using BBRsm.Daemon.Commands;
 using BBRsm.Daemon.HttpHandlers;
+using BBRsm.Daemon.Tasks;
 using BBTool.Config;
 using BBTool.Config.Commands.Extensions;
 
@@ -100,8 +101,26 @@ public static class Program
             return false;
         });
 
+        var producer = new Producer().Run();
+
+        Console.WriteLine("000");
+
+        var consumer = new Consumer().Run();
+
+        Console.WriteLine("111");
+
+        // 生产者、消费者开始工作
+        // producer.Start();
+        Console.WriteLine("222");
+        // consumer.Start();
+
+        Console.WriteLine("333");
+
         // 开始监听
         await Global.Server.Start(ServerHandler);
+
+        await producer;
+        await consumer;
 
         if (Global.LogoutTask.Status == TaskStatus.Running)
         {
