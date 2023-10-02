@@ -101,11 +101,11 @@ public static class Program
             return false;
         });
 
-        var producer = new Producer().Run();
+        var producer = Task<int>.Run(async () => { return await new Producer().Run(); });
 
         Console.WriteLine("000");
 
-        var consumer = new Consumer().Run();
+        var consumer = Task<int>.Run(async () => { return await new Consumer().Run(); });
 
         Console.WriteLine("111");
 

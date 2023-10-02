@@ -16,21 +16,21 @@ public class GetSubComments : SimpleRequest
             {
                 var comments = new List<CommentInfo>();
 
-                int cnt = obj.GetProperty("page").GetProperty("count").GetInt32();
-                if (cnt > 0)
+                // int cnt = obj.GetProperty("page").GetProperty("count").GetInt32();
+                if (obj.TryGetProperty("replies", out var replies) && replies.ValueKind == JsonValueKind.Array)
                 {
-                    var replies = obj.GetProperty("replies");
-
-                    foreach (JsonElement item in replies.EnumerateArray())
+                    if (replies.ValueKind == JsonValueKind.Array)
                     {
-                        var info = new CommentInfo();
-                        info.Id = item.GetProperty("rpid").GetInt64();
-                        info.Mid = item.GetProperty("mid").GetInt64();
-                        info.UserName = item.GetProperty("member").GetProperty("uname").GetString()!;
-                        info.Message = item.GetProperty("content").GetProperty("message").GetString()!;
-                        info.Count = item.GetProperty("count").GetInt32();
-
-                        comments.Add(info);
+                        foreach (JsonElement item in replies.EnumerateArray())
+                        {
+                            var info = new CommentInfo();
+                            info.Id = item.GetProperty("rpid").GetInt64();
+                            info.Mid = item.GetProperty("mid").GetInt64();
+                            info.UserName = item.GetProperty("member").GetProperty("uname").GetString()!;
+                            info.Message = item.GetProperty("content").GetProperty("message").GetString()!;
+                            info.Count = item.GetProperty("count").GetInt32();
+                            comments.Add(info);
+                        }
                     }
                 }
 

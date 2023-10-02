@@ -16,11 +16,9 @@ public class GetRootComments : SimpleRequest
             {
                 var comments = new List<CommentInfo>();
 
-                int cnt = obj.GetProperty("page").GetProperty("count").GetInt32();
-                if (cnt > 0)
+                // int cnt = obj.GetProperty("page").GetProperty("count").GetInt32();
+                if (obj.TryGetProperty("replies", out var replies) && replies.ValueKind == JsonValueKind.Array)
                 {
-                    var replies = obj.GetProperty("replies");
-
                     foreach (JsonElement item in replies.EnumerateArray())
                     {
                         var info = new CommentInfo();
